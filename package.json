@@ -1,0 +1,33 @@
+{
+  "name": "devquest",
+  "version": "1.0.0",
+  "description": "Aprende Python, JavaScript y más lenguajes desde cero hasta proyectos reales. Lecciones interactivas estilo Duolingo.",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "start": "npx serve .",
+    "test": "node --test tests/*.test.js",
+    "test:server": "node --test server/test/*.test.js",
+    "test:all": "node --test tests/*.test.js server/test/*.test.js",
+    "start:server": "node server/src/server.js",
+    "test:watch": "node --test --watch tests/",
+    "test:coverage": "node --test --experimental-test-coverage tests/",
+    "lint": "eslint .",
+    "dev": "npx serve . -p 3000"
+  },
+  "keywords": [
+    "python",
+    "education",
+    "learning",
+    "interactive",
+    "duolingo"
+  ],
+  "author": "Jose A. Lorenzo",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.57.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>DevQuest — Aprende a programar sin límites</title>
+  <meta name="description" content="Aprende Python, JavaScript y más lenguajes desde cero hasta proyectos reales. Lecciones interactivas estilo Duolingo, sin límites de tiempo. ¡Practica cuando quieras!">
+  <meta name="theme-color" content="#0D0D26">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐍</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- CONFETTI + OVERLAYS                   -->
+  <!-- ══════════════════════════════════════ -->
+  <canvas id="confetti-canvas"></canvas>
+  <div id="toast"></div>
+  <div id="xp-popup"></div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- SCREEN: WELCOME                       -->
+  <!-- ══════════════════════════════════════ -->
+  <div id="screen-welcome" class="screen screen-fullscreen active">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;min-height:100vh;padding:40px 24px;gap:24px;text-align:center;background:radial-gradient(circle at 50% 20%, rgba(124,92,252,0.15) 0%, transparent 60%)">
+
+      <div class="welcome-logo">🐍</div>
+
+      <div>
+        <h1 class="welcome-title">DevQuest</h1>
+        <p class="welcome-subtitle">Aprende Python desde cero hasta proyectos reales. Sin límites de tiempo.</p>
+      </div>
+
+      <div class="welcome-features">
+        <div class="welcome-feature">
+          <span class="feat-icon">⏰</span>
+          <span>Sin límite de tiempo — practica cuanto quieras</span>
+        </div>
+        <div class="welcome-feature">
+          <span class="feat-icon">🎯</span>
+          <span>14 módulos · 40 lecciones · 230 ejercicios</span>
+        </div>
+        <div class="welcome-feature">
+          <span class="feat-icon">🏆</span>
+          <span>XP, streaks, logros y liga competitiva</span>
+        </div>
+        <div class="welcome-feature">
+          <span class="feat-icon">🚀</span>
+          <span>De "Hola Mundo" a proyectos reales</span>
+        </div>
+      </div>
+
+      <div class="name-input-wrap">
+        <label for="input-name">¿Cómo te llamamos?</label>
+        <input type="text" id="input-name" class="name-input" placeholder="Tu apodo de Pythonista" maxlength="20" autocomplete="off">
+      </div>
+
+      <button id="btn-start" class="btn btn-primary btn-lg btn-full" style="max-width:340px">
+        🚀 Empezar a aprender
+      </button>
+
+      <p style="font-size:0.78rem;color:var(--text-3)">El progreso se guarda automáticamente en tu navegador</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- MODAL: MODO ADMINISTRADOR             -->
+  <!-- ══════════════════════════════════════ -->
+  <div id="admin-modal" class="admin-modal" role="dialog" aria-modal="true"
+       aria-labelledby="admin-modal-title" hidden>
+    <div class="admin-modal-backdrop" data-close-admin></div>
+    <div class="admin-modal-box">
+      <h2 id="admin-modal-title" class="admin-modal-title">administrador</h2>
+      <p class="admin-modal-sub">Introduce la contraseña para abrir todos los ejercicios</p>
+
+      <form id="admin-form" autocomplete="off">
+        <label class="admin-label" for="admin-password">Contraseña</label>
+        <input type="password" id="admin-password" class="admin-input"
+               placeholder="••••••••••" autocomplete="off" spellcheck="false">
+        <p id="admin-error" class="admin-error" role="alert" hidden></p>
+
+        <div class="admin-modal-actions">
+          <button type="button" class="btn btn-ghost" id="admin-cancel">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="admin-submit">Entrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- SCREEN: LANGUAGES HUB (principal)      -->
+  <!-- ══════════════════════════════════════ -->
+  <div id="screen-languages" class="screen">
+
+    <div class="home-header">
+      <div class="home-top-row">
+        <div class="user-greeting">
+          <div class="user-avatar" id="hub-avatar">P</div>
+          <div class="user-info-text">
+            <div class="greeting">¿Qué quieres estudiar,</div>
+            <div class="username" id="hub-username">Pythonista</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="manifesto">
+      <h1 class="manifesto-title">Aprende a programar de verdad</h1>
+      <p class="manifesto-lead">
+        DevQuest es una aplicación <strong>gratuita</strong> para aprender lenguajes de programación
+        de forma amena: lecciones cortas, ejercicios interactivos y sin límites de tiempo.
+      </p>
+      <p class="manifesto-text">
+        Hoy la inteligencia artificial programa por nosotros, y con ella se está perdiendo el
+        hábito de pensar los problemas por tu cuenta. Por eso seguimos aquí: <strong>el día que
+        todo falle, nadie sabrá arreglarlo</strong>. Aprender a programar no es memorizar sintaxis,
+        es aprender a descomponer un problema hasta encontrar la solución.
+      </p>
+      <p class="manifesto-text">
+        Cada lenguaje tiene su propia ruta, desde los cimientos hasta proyectos reales.
+        Sin anuncios, sin registro obligatorio y sin cuotas. Tu progreso se guarda en tu
+        navegador.
+      </p>
+      <div class="manifesto-badges">
+        <span class="manifesto-badge">💸 100% gratis</span>
+        <span class="manifesto-badge">🚫 Sin anuncios</span>
+        <span class="manifesto-badge">⏱ Sin límites de tiempo</span>
+        <span class="manifesto-badge">🧠 10 lenguajes</span>
+      </div>
+    </div>
+
+    <div class="path-section">
+      <div class="path-section-title">Elige tu lenguaje</div>
+      <div id="languages-grid"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- SCREEN: HOME (curso actual)             -->
+  <!-- ══════════════════════════════════════ -->
+  <div id="screen-home" class="screen">
+
+    <!-- Header -->
+    <div class="home-header">
+      <div class="home-top-row">
+        <div class="user-greeting">
+          <button class="back-btn" id="home-back-btn" title="Lenguajes" style="position:static">←</button>
+          <div class="user-avatar" id="home-avatar">P</div>
+          <div class="user-info-text">
+            <div class="greeting" id="home-language">🐍 Python</div>
+            <div class="username" id="home-username">Pythonista</div>
+          </div>
+        </div>
+        <div class="home-stats-pills">
+          <div class="stat-pill streak">
+            <span class="pill-icon">🔥</span>
+            <span id="home-streak">0</span>
+          </div>
+          <div class="stat-pill xp">
+            <span class="pill-icon">⚡</span>
+            <span id="home-xp">0</span>
+          </div>
+          <div class="stat-pill lives">
+            <span class="pill-icon">❤️</span>
+            <span id="home-lives">5</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- XP Bar -->
+      <div class="xp-bar-section">
+        <div class="level-badge" id="home-level">Nv. 1</div>
+        <div class="xp-bar-wrap">
+          <div class="xp-bar-fill" id="home-xp-bar" style="width:0%"></div>
+        </div>
+        <div class="xp-label" id="home-xp-label">0 / 200 XP</div>
+      </div>
+    </div>
+
+    <!-- Continue Button -->
+    <div class="continue-section">
+      <p class="course-about" id="home-language-about"></p>
+      <div class="continue-card" id="continue-card">
+        <div class="continue-text">
+          <div class="label">CONTINUAR</div>
+          <div class="title" id="continue-module-name">Tu Primer Programa</div>
+          <div class="subtitle" id="continue-lesson-name">¡Hola, Mundo!</div>
+        </div>
+        <div class="continue-arrow">▶</div>
+      </div>
+    </div>
+
+    <!-- Module List -->
+    <div class="path-section">
+      <div class="path-section-title">Ruta de Aprendizaje</div>
+      <div id="module-list"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- SCREEN: MODULE DETAIL                 -->
+  <!-- ══════════════════════════════════════ -->
+  <div id="screen-module-detail" class="screen">
+    <div id="module-detail-content"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- SCREEN: LESSON / EXERCISE             -->
+  <!-- ══════════════════════════════════════ -->
+  <div id="screen-lesson" class="screen screen-fullscreen">
+
+    <!-- Top bar -->
+    <div class="lesson-topbar">
+      <button class="lesson-close-btn" id="lesson-close-btn" title="Salir">✕</button>
+      <div class="progress-bubbles" id="progress-bubbles"></div>
+      <div class="lesson-lives" id="lesson-lives"></div>
+    </div>
+
+    <!-- Exercise Area -->
+    <div class="exercise-area" id="exercise-area">
+      <!-- Rendered by Engine.render() -->
+    </div>
+
+    <!-- Feedback Panel -->
+    <div class="feedback-panel hidden" id="feedback-panel"></div>
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+      <button class="btn btn-primary btn-full" id="btn-check" disabled>Comprobar</button>
+      <button class="btn btn-success btn-full" id="btn-next-lesson" style="display:none;margin-top:8px;">
+        Siguiente lección →
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- SCREEN: LESSON COMPLETE               -->
+  <!-- ══════════════════════════════════════ -->
+  <div id="screen-complete" class="screen screen-fullscreen">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 24px;gap:24px;text-align:center;background:radial-gradient(circle at 50% 30%, rgba(255,214,10,0.1) 0%, transparent 60%)">
+
+      <div class="complete-emoji">🎉</div>
+      <h1 class="complete-title">¡Lección Completada!</h1>
+      <p class="complete-subtitle" id="complete-lesson-name">Has terminado la lección</p>
+
+      <!-- XP Gained -->
+      <div class="xp-gained-animation" id="complete-xp">+0 XP</div>
+
+      <!-- Stats -->
+      <div class="complete-stats" style="width:100%;max-width:360px">
+        <div class="complete-stat xp">
+          <span class="stat-value" id="complete-xp-stat">0</span>
+          <span class="stat-label">XP ganados</span>
+        </div>
+        <div class="complete-stat accuracy">
+          <span class="stat-value" id="complete-accuracy">100%</span>
+          <span class="stat-label">Precisión</span>
+        </div>
+        <div class="complete-stat streak">
+          <span class="stat-value" id="complete-streak">0</span>
+          <span class="stat-label">🔥 Racha</span>
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:360px">
+        <button class="btn btn-primary btn-lg btn-full" id="btn-complete-continue">
+          Siguiente lección →
+        </button>
+        <button class="btn btn-secondary btn-full" id="btn-complete-home">
+          🏠 Volver al inicio
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- SCREEN: PROFILE                       -->
+  <!-- ══════════════════════════════════════ -->
+  <div id="screen-profile" class="screen">
+
+    <div class="profile-header">
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar-large" id="profile-avatar">P</div>
+        <label class="avatar-upload" for="avatar-input" title="Cambiar foto">
+          📷
+          <input type="file" id="avatar-input" accept="image/*" hidden>
+        </label>
+      </div>
+      <div class="profile-name" id="profile-name">Pythonista</div>
+      <div class="profile-title" id="profile-title">Novato · Nivel 1</div>
+
+      <div class="profile-edit">
+        <label for="profile-name-input">Tu nombre</label>
+        <div class="profile-edit-row">
+          <input type="text" id="profile-name-input" class="profile-name-input" maxlength="40" placeholder="Escribe tu nombre">
+          <button class="btn btn-sm btn-secondary" id="btn-save-profile">Guardar</button>
+        </div>
+        <div class="emoji-picker" id="emoji-picker"></div>
+        <button class="btn btn-sm btn-outline" id="btn-clear-avatar" style="margin-top:8px;">Quitar foto</button>
+      </div>
+    </div>
+
+    <div class="profile-stats-grid">
+      <div class="profile-stat-card">
+        <span class="psc-icon">⚡</span>
+        <span class="psc-value" id="psc-xp">0</span>
+        <span class="psc-label">XP Total</span>
+      </div>
+      <div class="profile-stat-card">
+        <span class="psc-icon">🔥</span>
+        <span class="psc-value" id="psc-streak">0</span>
+        <span class="psc-label">Racha días</span>
+      </div>
+      <div class="profile-stat-card">
+        <span class="psc-icon">📚</span>
+        <span class="psc-value" id="psc-lessons">0</span>
+        <span class="psc-label">Lecciones</span>
+      </div>
+      <div class="profile-stat-card">
+        <span class="psc-icon">🎯</span>
+        <span class="psc-value" id="psc-accuracy">0%</span>
+        <span class="psc-label">Precisión</span>
+      </div>
+      <div class="profile-stat-card">
+        <span class="psc-icon">🏗️</span>
+        <span class="psc-value" id="psc-modules">0</span>
+        <span class="psc-label">Módulos</span>
+      </div>
+      <div class="profile-stat-card">
+        <span class="psc-icon">⭐</span>
+        <span class="psc-value" id="psc-level">1</span>
+        <span class="psc-label">Nivel</span>
+      </div>
+    </div>
+
+    <div class="achievements-section">
+      <div class="section-title">Logros</div>
+      <div class="achievements-grid" id="achievements-grid"></div>
+    </div>
+
+    <!-- Firma de la app al final del perfil. El pato es a la vez logo y
+         acceso al modo administrador: parece una firma más, pero abre
+         el modal de la contraseña. -->
+    <div class="profile-signature">
+      <button id="btn-admin" class="signature-logo-btn" type="button"
+              title="PatoDev" aria-label="PatoDev">
+        <img src="assets/img/pato-logo-128.png" alt="" width="72" height="72" class="signature-logo">
+      </button>
+      <p class="signature-name">PatoDev</p>
+      <p class="signature-tag">Hecho para aprender a programar de verdad</p>
+    </div>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- CONTACTO                              -->
+    <!-- Botón al final del perfil que despliega -->
+    <!-- el formulario.                        -->
+    <!-- ══════════════════════════════════════ -->
+    <div class="contact-section">
+      <button id="btn-contact-toggle" class="contact-toggle" type="button"
+              aria-expanded="false" aria-controls="contact-panel">
+        <span class="contact-toggle-icon">✉️</span>
+        <span class="contact-toggle-text">
+          ¿Tienes alguna consulta? Contáctanos
+        </span>
+        <span class="contact-chevron">▾</span>
+      </button>
+
+      <div id="contact-panel" class="contact-panel" hidden>
+        <p class="contact-intro">
+          ¿Has encontrado un fallo, una duda con un ejercicio o quieres sugerir algo?
+          Cuéntanoslo y te respondemos.
+        </p>
+
+        <form id="contact-form" class="contact-form" novalidate>
+          <div class="contact-row">
+            <div class="contact-field">
+              <label for="contact-name">Tu nombre</label>
+              <input type="text" id="contact-name" name="name" maxlength="80"
+                     autocomplete="name" placeholder="Cómo te llamamos">
+            </div>
+            <div class="contact-field">
+              <label for="contact-email">Tu email</label>
+              <input type="email" id="contact-email" name="email" maxlength="160"
+                     autocomplete="email" placeholder="para poder responderte">
+            </div>
+          </div>
+
+          <div class="contact-field">
+            <label for="contact-subject">Asunto</label>
+            <input type="text" id="contact-subject" name="subject" maxlength="120"
+                   placeholder="De qué va el mensaje">
+          </div>
+
+          <div class="contact-field">
+            <label for="contact-message">Mensaje</label>
+            <textarea id="contact-message" name="message" rows="5" maxlength="4000"
+                      placeholder="Cuéntanos con detalle qué pasa"></textarea>
+          </div>
+
+          <p class="contact-status" id="contact-status" role="status" hidden></p>
+
+          <div class="contact-actions">
+            <button type="button" class="btn btn-ghost" id="contact-cancel">Cancelar</button>
+            <button type="submit" class="btn btn-primary" id="contact-send">Enviar mensaje</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- SCREEN: LEAGUE                        -->
+  <!-- ══════════════════════════════════════ -->
+  <div id="screen-league" class="screen">
+
+    <div class="league-header">
+      <div style="font-size:2.5rem;margin-bottom:8px">🏆</div>
+      <h1 class="league-title">Liga Semanal</h1>
+      <p class="league-subtitle">Tu ranking con usuarios reales</p>
+    </div>
+
+    <div class="podium" id="podium"></div>
+
+    <div class="leaderboard-list" id="leaderboard-list"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- BOTTOM NAVIGATION                     -->
+  <!-- ══════════════════════════════════════ -->
+  <nav id="bottom-nav" style="display:none">
+    <div class="nav-item active" data-screen="home">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-label">Inicio</div>
+    </div>
+    <div class="nav-item" data-screen="module-detail" id="nav-path" style="display:none">
+      <div class="nav-icon">🗺️</div>
+      <div class="nav-label">Ruta</div>
+    </div>
+    <div class="nav-item" data-screen="league">
+      <div class="nav-icon">🏆</div>
+      <div class="nav-label">Liga</div>
+    </div>
+    <div class="nav-item" data-screen="profile">
+      <div class="nav-icon">👤</div>
+      <div class="nav-label">Perfil</div>
+    </div>
+  </nav>
+
+</div><!-- #app -->
+
+<!-- Python execution via Skulpt -->
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"
+        onerror="console.warn('Skulpt not loaded. type-code exercises will not run Python.')"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"
+        onerror="console.warn('Skulpt stdlib not loaded.')"></script>
+
+<!-- App scripts -->
+<script src="curriculum.js"></script>
+<script src="curriculums/javascript.js"></script>
+<script src="curriculums/html.js"></script>
+<script src="curriculums/css.js"></script>
+<script src="curriculums/sql.js"></script>
+<script src="sqlengine.js"></script>
+<script src="languages.js"></script>
+<script src="engine.js"></script>
+<script src="app.js"></script>
+
+<script>
+  // Fix complete screen XP display
+  const origComplete = App.showCompleteScreen?.bind(App);
+  if (App) {
+    const _origComplete = App.showCompleteScreen;
+    App.showCompleteScreen = function() {
+      _origComplete.call(this);
+      // Also update the stat value
+      document.getElementById('complete-xp-stat').textContent = this.lessonSession.xpEarned;
+    };
+  }
+</script>
+
+</body>
+</html>

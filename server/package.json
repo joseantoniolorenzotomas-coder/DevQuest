@@ -1,0 +1,15 @@
+{
+  "name": "devquest-server",
+  "version": "1.0.0",
+  "description": "Backend de DevQuest: registro, login y ranking. Cero dependencias.",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "license": "MIT"
+}
