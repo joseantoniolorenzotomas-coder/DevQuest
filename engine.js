@@ -5,14 +5,103 @@ window.Engine = {
 
   // ════════════════════════════════════════
   // Run code in browser: Python via Skulpt, JavaScript nativo, HTML con DOMParser,
-  // CSS con un analizador de reglas y SQL con el mini motor de sqlengine.js
+  // CSS con un analizador de reglas, SQL con sqlengine.js, Java con
+  // javaengine.js, C++ con cppengine.js, PHP con phpengine.js, Go con goengine.js
+  // y TypeScript con tsengine.js
   // ════════════════════════════════════════
   runCode(lang, code) {
     if (lang === 'javascript') return this.runJavaScript(code);
     if (lang === 'html') return this.runHtml(code);
     if (lang === 'css') return this.runCss(code);
     if (lang === 'sql') return this.runSql(code);
+    if (lang === 'java') return this.runJava(code);
+    if (lang === 'cpp') return this.runCpp(code);
+    if (lang === 'php') return this.runPhp(code);
+    if (lang === 'go') return this.runGo(code);
+    if (lang === 'typescript') return this.runTypeScript(code);
     return this.runPython(code);
+  },
+
+  // TypeScript no tiene intérprete: tsengine.js comprueba los tipos, quita las
+  // anotaciones y ejecuta el JavaScript que queda, igual que harían tsc y el
+  // navegador. Por eso el orden importa: si hay un error de tipos, nada se
+  // ejecuta, que es justo lo que aporta este lenguaje.
+  runTypeScript(code) {
+    return new Promise((resolve) => {
+      if (typeof window === 'undefined' || !window.TS_ENGINE) {
+        resolve({ output: '[TypeScript sin soporte. Comprueba tu conexión]\n', error: false });
+        return;
+      }
+      try {
+        resolve(window.TS_ENGINE.ejecutar(code));
+      } catch (err) {
+        resolve({ output: String(err && err.message ? err.message : err), error: true });
+      }
+    });
+  },
+
+  // Go tampoco se ejecuta en el navegador: lo interpreta goengine.js, que
+  // covers el subconjunto que se enseña en el curso.
+  runGo(code) {
+    return new Promise((resolve) => {
+      if (typeof window === 'undefined' || !window.GO_ENGINE) {
+        resolve({ output: '[Go sin soporte. Comprueba tu conexión]\n', error: false });
+        return;
+      }
+      try {
+        resolve(window.GO_ENGINE.ejecutar(code));
+      } catch (err) {
+        resolve({ output: String(err && err.message ? err.message : err), error: true });
+      }
+    });
+  },
+
+  // PHP tampoco se ejecuta en el navegador: lo interpreta phpengine.js, que
+  // cubre el subconjunto que se enseña en el curso.
+  runPhp(code) {
+    return new Promise((resolve) => {
+      if (typeof window === 'undefined' || !window.PHP_ENGINE) {
+        resolve({ output: '[PHP sin soporte. Comprueba tu conexión]\n', error: false });
+        return;
+      }
+      try {
+        resolve(window.PHP_ENGINE.ejecutar(code));
+      } catch (err) {
+        resolve({ output: String(err && err.message ? err.message : err), error: true });
+      }
+    });
+  },
+
+  // C++ tampoco tiene compilador en el navegador: lo interpreta cppengine.js,
+  // que cubre el subconjunto que se enseña en el curso.
+  runCpp(code) {
+    return new Promise((resolve) => {
+      if (typeof window === 'undefined' || !window.CPP_ENGINE) {
+        resolve({ output: '[C++ sin soporte. Comprueba tu conexión]\n', error: false });
+        return;
+      }
+      try {
+        resolve(window.CPP_ENGINE.ejecutar(code));
+      } catch (err) {
+        resolve({ output: String(err && err.message ? err.message : err), error: true });
+      }
+    });
+  },
+
+  // Java no se ejecuta en el navegador: lo interpreta javaengine.js, que
+  // cubre el subconjunto que se enseña en el curso.
+  runJava(code) {
+    return new Promise((resolve) => {
+      if (typeof window === 'undefined' || !window.JAVA_ENGINE) {
+        resolve({ output: '[Java sin soporte. Comprueba tu conexión]\n', error: false });
+        return;
+      }
+      try {
+        resolve(window.JAVA_ENGINE.ejecutar(code));
+      } catch (err) {
+        resolve({ output: String(err && err.message ? err.message : err), error: true });
+      }
+    });
   },
 
   // SQL no imprime nada: ejecuta la consulta y devuelve la tabla de resultados
@@ -102,6 +191,20 @@ window.Engine = {
     });
   },
 
+  /**
+   * Ejecuta JavaScript en un entorno controlado.
+   *
+   * IMPORTANTE DE SEGURIDAD: En el navegador, `new Function()` permite ejecutar
+   * código arbitrario con acceso al DOM. En producción, esto es un riesgo XSS.
+   * Alternativas más seguras (requieren más trabajo):
+   *   - Web Worker con sandbox (sin acceso al DOM)
+   *   - iframe con atributo sandbox
+   *   - Interpretador JS escrito en JS (como los otros motores)
+   *
+   * Aquí usamos new Function() por simplicidad (igual que Skulpt para Python),
+   * pero SOLO para ejercicios de tipo-code donde el usuario escribe el código.
+   * NO se usa para renderizar contenido de terceros.
+   */
   runJavaScript(code) {
     return new Promise((resolve) => {
       const logs = [];
@@ -109,7 +212,8 @@ window.Engine = {
         log(...args) { logs.push(args.map(a => String(a)).join(' ')); }
       };
       try {
-        const fn = new Function('console', code);
+        // "use strict" evita algunas fugas al objeto global
+        const fn = new Function('console', '"use strict";\n' + code);
         fn(sandboxConsole);
         resolve({ output: logs.length ? logs.join('\n') + '\n' : '', error: false });
       } catch (err) {
@@ -220,7 +324,11 @@ window.Engine = {
   _renderFillBlank(ex, container) {
     const q = document.createElement('div');
     q.className = 'exercise-question';
-    q.textContent = 'Selecciona las palabras correctas para completar el código:';
+    // La pregunta del ejercicio dice QUÉ tiene que hacer el código. Antes se
+    // ignoraba y se ponía un texto genérico, así que el alumno se encontraba
+    // "100 ___ 37" sin saber si iba suma o resta: cualquier respuesta era
+    // una adivinanza.
+    q.textContent = ex.question || 'Completa el código con las palabras correctas:';
     container.appendChild(q);
 
     // Code block with blanks
@@ -495,7 +603,12 @@ window.Engine = {
       javascript: 'JavaScript',
       html: 'HTML',
       css: 'CSS',
-      sql: 'SQL'
+      sql: 'SQL',
+      java: 'Java',
+      cpp: 'C++',
+      php: 'PHP',
+      go: 'Go',
+      typescript: 'TypeScript'
     };
     const hint = (lang === 'html' || lang === 'css')
       ? '⏎ indentado opcional'
@@ -578,10 +691,16 @@ window.Engine = {
 
     if (result.error) {
       output.innerHTML = `<span style="color:var(--red)">${this._escapeHtml(result.output)}</span>`;
+      // Aun así se guarda la salida: si el alumno pulsa Comprobar, debe ver
+      // la solución en vez de un aviso de "ejecuta el código primero"
+      output.dataset.lastOutput = result.output;
+      output.dataset.hadError = '1';
+      document.getElementById('btn-check')?.removeAttribute('disabled');
     } else {
       output.innerHTML = `<span style="color:var(--green)">${this._escapeHtml(result.output || '(sin salida)')}</span>`;
       // Store the last run output
       output.dataset.lastOutput = result.output;
+      delete output.dataset.hadError;
       document.getElementById('btn-check')?.removeAttribute('disabled');
     }
   },
@@ -722,11 +841,20 @@ window.Engine = {
         if (lastOutput === undefined) return { correct: false, message: 'Ejecuta el código primero' };
         const editor = document.getElementById('code-editor');
         const code = editor ? editor.value : '';
+
+        // El código no compiló: no es un fallo de redacción sino un error de Java,
+        // y el mensaje del intérprete ya explica qué pasa. Se enseña la
+        // solución igualmente, que es lo prometido al fallar.
+        if (output?.dataset.hadError === '1') {
+          return {
+            correct: false,
+            explanation: (exercise.explanation || '') + (exercise.explanation ? ' ' : '') + 'El intérprete avisa: ' + String(lastOutput).trim()
+          };
+        }
+
         const tests = exercise.tests || [];
         const isCorrect = tests.every(test => {
-          const expected = String(test.expected ?? '').trim();
-          const actual = (lastOutput || '').trim();
-          if (actual !== expected) return false;
+          if (!this._coincideSalida(test.expected, lastOutput)) return false;
           // Opcional: exigir que el código contenga cierta estructura (útil en HTML)
           if (test.contains && !code.toLowerCase().includes(String(test.contains).toLowerCase())) return false;
           return true;
@@ -737,6 +865,35 @@ window.Engine = {
       default:
         return { correct: true };
     }
+  },
+
+  /**
+   * Compara la salida del alumno con la esperada.
+   *
+   * Adentro del esperado se puede poner {{algo}} como comodín: vale cualquier
+   * texto no vacío de esa misma línea. Hace falta para los ejercicios donde
+   * la respuesta correcta depende de una decisión del alumno, como el nombre
+   * que escribe en su tarjeta de presentación. Sin esto, el ejercicio
+   * aceptaba solo el nombre que escribió el autor.
+   *
+   * Se comparan las líneas una a una, así que el resto del formato sigue
+   * teniendo que ser exacto.
+   */
+  _coincideSalida(esperado, real) {
+    const lineasEsperadas = String(esperado ?? '').trim().split('\n');
+    const lineasReales = String(real ?? '').trim().split('\n');
+    if (lineasEsperadas.length !== lineasReales.length) return false;
+
+    return lineasEsperadas.every((linea, i) => {
+      if (!linea.includes('{{')) return linea === lineasReales[i];
+      const patron = linea
+        .split(/(\{\{[^}]*\}\})/)
+        .map(parte => (parte.startsWith('{{') && parte.endsWith('}}')
+          ? '.+'
+          : parte.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+        .join('');
+      return new RegExp('^' + patron + '$').test(lineasReales[i]);
+    });
   },
 
   _highlightChoices(selected, correct, count) {

@@ -209,10 +209,11 @@ window.JS_CURRICULUM = [
           {
             id: 'jse023', type: 'type-code', xp: 35,
             explanation: 'console.log() separa con un espacio los argumentos que le pases. Cada línea de la tarjeta es una llamada distinta.',
-            description: 'Crea tu tarjeta de presentación:\n• Línea 1: "Nombre: " + tu nombre\n• Línea 2: "Lenguaje favorito: JavaScript"\n• Línea 3: "Nivel: Principiante"',
+            description: 'Crea tu tarjeta de presentación:\n• Línea 1: "Nombre: " seguido de TU nombre\n• Línea 2: "Lenguaje favorito: JavaScript"\n• Línea 3: "Nivel: Principiante"',
             starter: '// Mi tarjeta de presentación\n',
-            solution: 'console.log("Nombre: JS")\nconsole.log("Lenguaje favorito: JavaScript")\nconsole.log("Nivel: Principiante")',
-            tests: [{ expected: 'Nombre: JS\nLenguaje favorito: JavaScript\nNivel: Principiante\n' }]
+            solution: 'console.log("Nombre: Ana")\nconsole.log("Lenguaje favorito: JavaScript")\nconsole.log("Nivel: Principiante")',
+            // El nombre lo elige el alumno: comodín en esa línea
+            tests: [{ expected: 'Nombre: {{tu nombre}}\nLenguaje favorito: JavaScript\nNivel: Principiante\n' }]
           },
           {
             id: 'jse024', type: 'multiple-choice', xp: 15,
@@ -1175,7 +1176,7 @@ window.JS_CURRICULUM = [
           },
           {
             id: 'jse123', type: 'fill-blank', xp: 25,
-            question: 'Completa el contador:',
+            question: 'Completa la condición del bucle para que llegue a imprimir el 5, no solo hasta el 4:',
             code: 'let cuenta = 1\nwhile (cuenta ___ 5) {\n    console.log(cuenta)\n    cuenta++\n}',
             blanks: ['<='],
             options: ['<=', '<', '>=', '=='],

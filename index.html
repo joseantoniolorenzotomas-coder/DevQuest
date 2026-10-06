@@ -4,8 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>DevQuest — Aprende a programar sin límites</title>
-  <meta name="description" content="Aprende Python, JavaScript y más lenguajes desde cero hasta proyectos reales. Lecciones interactivas estilo Duolingo, sin límites de tiempo. ¡Practica cuando quieras!">
+  <meta name="description" content="Aprende Python, JavaScript, HTML, CSS, SQL, Java y C++ desde cero hasta proyectos reales. Lecciones interactivas estilo Duolingo, sin límites de tiempo. ¡Practica cuando quieras!">
   <meta name="theme-color" content="#0D0D26">
+  <!-- Content Security Policy: previene XSS limitando origenes permitidos -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' https://cdn.jsdelivr.net;
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data: https:;
+    font-src 'self' data:;
+    connect-src 'self' https:;
+    frame-ancestors 'none';
+    base-uri 'self';
+    form-action 'self' https://formspree.io;
+  ">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐍</text></svg>">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -30,7 +42,7 @@
 
       <div>
         <h1 class="welcome-title">DevQuest</h1>
-        <p class="welcome-subtitle">Aprende Python desde cero hasta proyectos reales. Sin límites de tiempo.</p>
+        <p class="welcome-subtitle">Aprende Python, JS, SQL y muchos más... desde cero hasta proyectos reales. Sin límites de tiempo.</p>
       </div>
 
       <div class="welcome-features">
@@ -40,7 +52,7 @@
         </div>
         <div class="welcome-feature">
           <span class="feat-icon">🎯</span>
-          <span>14 módulos · 40 lecciones · 230 ejercicios</span>
+          <span>10 lenguajes · 134 módulos · 272 lecciones · 1.640 ejercicios</span>
         </div>
         <div class="welcome-feature">
           <span class="feat-icon">🏆</span>
@@ -463,7 +475,37 @@
 <script src="curriculums/html.js"></script>
 <script src="curriculums/css.js"></script>
 <script src="curriculums/sql.js"></script>
+<script src="curriculums/java.js"></script>
+<script src="curriculums/cpp.js"></script>
+<script src="curriculums/php.js"></script>
+<script src="curriculums/go.js"></script>
+<script src="curriculums/typescript.js"></script>
 <script src="sqlengine.js"></script>
+<script src="javaengine.js"></script>
+<script src="cppengine.js"></script>
+<script src="phpengine.js"></script>
+<script src="goengine.js"></script>
+<script src="tsengine.js"></script>
+<!-- ══════════════════════════════════════ -->
+<!-- CONFIGURACIÓN OPCIONAL DEL CONTACTO     -->
+<!-- GitHub Pages es estático: no ejecuta     -->
+<!-- Node, así que server/ no puede recibir   -->
+<!-- nada desde aquí. Por defecto el          -->
+<!-- formulario usa mailto:, que siempre      -->
+<!-- funciona.                                 -->
+<!--                                           -->
+<!-- Para recibir los mensajes en el buzón sin -->
+<!-- que el visitante use su gestor de correo, -->
+<!-- define UNA de estas dos líneas ANTES de   -->
+<!-- cargar contact.js:                       -->
+<!--                                           -->
+<!--   A) Servicio de formularios (2 minutos): -->
+<!--   <script>window.DEVQUEST_CONTACT_FORM_URL = 'https://formspree.io/f/TU_ID';</script> -->
+<!--                                           -->
+<!--   B) Tu backend Node, si lo despliegas:   -->
+<!--   <script>window.DEVQUEST_API_URL = 'https://tu-servidor.com/api/contact';</script> -->
+<!-- ========================================= -->
+<script src="contact.js"></script>
 <script src="languages.js"></script>
 <script src="engine.js"></script>
 <script src="app.js"></script>

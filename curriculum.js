@@ -214,10 +214,12 @@ window.CURRICULUM = {
             {
               id: 'e023', type: 'type-code', xp: 35,
               explanation: 'print() separa con un espacio los argumentos que le pases. Aquí cada línea de la tarjeta es un print independiente.',
-              description: 'Crea tu tarjeta de presentación:\n• Línea 1: "Nombre: " + tu nombre\n• Línea 2: "Lenguaje favorito: Python"\n• Línea 3: "Nivel: Principiante"',
+              description: 'Crea tu tarjeta de presentación:\n• Línea 1: "Nombre: " seguido de TU nombre\n• Línea 2: "Lenguaje favorito: Python"\n• Línea 3: "Nivel: Principiante"',
               starter: '# Mi tarjeta de presentación\n',
-              solution: 'print("Nombre: Python")\nprint("Lenguaje favorito: Python")\nprint("Nivel: Principiante")',
-              tests: [{ expected: 'Nombre: Python\nLenguaje favorito: Python\nNivel: Principiante\n' }]
+              solution: 'print("Nombre: Ana")\nprint("Lenguaje favorito: Python")\nprint("Nivel: Principiante")',
+              // El nombre es cosa del alumno, así que el esperado lleva un
+              // comodín: cualquier nombre vale, las otras dos líneas no.
+              tests: [{ expected: 'Nombre: {{tu nombre}}\nLenguaje favorito: Python\nNivel: Principiante\n' }]
             },
             {
               id: 'e024', type: 'multiple-choice', xp: 15,
@@ -1183,7 +1185,7 @@ window.CURRICULUM = {
             },
             {
               id: 'e123', type: 'fill-blank', xp: 25,
-              question: 'Completa el contador:',
+              question: 'Completa la condición del bucle para que llegue a imprimir el 5, no solo hasta el 4:',
               code: 'cuenta = 1\nwhile cuenta ___ 5:\n    print(cuenta)\n    cuenta += 1',
               blanks: ['<='],
               options: ['<=', '<', '>=', '=='],

@@ -1070,9 +1070,9 @@ window.SQL_CURRICULUM = [
             id: 'sqle106', type: 'predict-output', xp: 25,
             question: '¿Cuántas filas da este INNER JOIN?',
             codeToRun: 'SELECT s.nombre FROM socios s INNER JOIN prestamos p ON p.socio_id = s.id',
-            output: ['3', '4', '5', '2'],
+            output: ['4', '3', '5', '2'],
             correctOutput: 0,
-            explanation: 'Hay 4 préstamos y los tres socios queKFHan pedido algo (Ana, Luis y Marta). Javi no tiene ninguno, así que el INNER lo descarta y quedan 3 filas.'
+            explanation: 'Cada préstamo es una fila, y hay 4. Fíjate en que Ana aparece dos veces: tiene dos préstamos. Javi no tiene ninguno, así que el INNER lo descarta, pero los tres socios que sí han pedido algo no se repiten: el JOIN no elimina duplicados.'
           },
           {
             id: 'sqle107', type: 'multiple-choice', xp: 20,

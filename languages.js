@@ -49,34 +49,34 @@ window.LANGUAGES = [
     about: 'Apps empresariales, Android y sistemas grandes. Ojo: pese al nombre, no tiene nada que ver con JavaScript.',
     icon: '☕', color: '#E76F00',
     gradient: 'linear-gradient(135deg, #E76F00 0%, #5382A1 100%)',
-    comingSoon: true, modules: []
+    get modules() { return window.JAVA_CURRICULUM || []; }
   },
   {
     id: 'cpp', title: 'C++', subtitle: 'Potencia y rendimiento',
     about: 'Potencia bruta: videojuegos, sistemas operativos y apps donde cada milisegundo cuenta.',
     icon: '⚙️', color: '#659AD2',
     gradient: 'linear-gradient(135deg, #659AD2 0%, #004482 100%)',
-    comingSoon: true, modules: []
+    get modules() { return window.CPP_CURRICULUM || []; }
   },
   {
     id: 'php', title: 'PHP', subtitle: 'La web dinámica clásica',
     about: 'El clásico de la web dinámica: WordPress y millones de sitios funcionan con PHP.',
     icon: '🐘', color: '#777BB4',
     gradient: 'linear-gradient(135deg, #777BB4 0%, #4F5B93 100%)',
-    comingSoon: true, modules: []
+    get modules() { return window.PHP_CURRICULUM || []; }
   },
   {
     id: 'go', title: 'Go', subtitle: 'Simple y concurrente',
     about: 'El lenguaje de Google: simple, rápido y con concurrencia fácil para servidores y la nube.',
     icon: '🐹', color: '#00ADD8',
     gradient: 'linear-gradient(135deg, #00ADD8 0%, #007D9C 100%)',
-    comingSoon: true, modules: []
+    get modules() { return window.GO_CURRICULUM || []; }
   },
   {
-    id: 'rust', title: 'Rust', subtitle: 'Seguro y ultrarrápido',
-    about: 'Seguridad sin sacrificar velocidad: sistemas, navegadores y el favorito de los desarrolladores.',
-    icon: '🦀', color: '#CE422B',
-    gradient: 'linear-gradient(135deg, #CE422B 0%, #8A2A1B 100%)',
-    comingSoon: true, modules: []
+    id: 'typescript', title: 'TypeScript', subtitle: 'JavaScript con tipos',
+    about: 'JavaScript con los tipos puestos: los errores aparecen al escribir el código, no al ejecutarlo.',
+    icon: '🟦', color: '#3178C6',
+    gradient: 'linear-gradient(135deg, #3178C6 0%, #1E4E8C 100%)',
+    get modules() { return window.TS_CURRICULUM || []; }
   }
 ];

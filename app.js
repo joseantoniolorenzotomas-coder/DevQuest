@@ -130,15 +130,9 @@ function generateUserId() {
 
 // ════════════════════════════════════════
 // CONTACTO
-// URL del backend. Si el servidor no está en marcha, el formulario guarda
-// el mensaje en localStorage y avisa de que se enviará luego.
+// La lógica de envío vive en contact.js (tres vías: API propia, servicio
+// de formularios y mailto). Aquí solo se conecta el formulario al DOM.
 // ════════════════════════════════════════
-const CONTACT_CONFIG = {
-  apiUrl: (typeof window !== 'undefined' && window.DEVQUEST_API_URL) || 'http://localhost:3001/api/contact',
-  storageKey: 'devquest-contact-buzon',
-  // Mismo criterio que el servidor, para avisar antes de enviar
-  min: { name: 2, subject: 3, message: 10 }
-};
 
 // ════════════════════════════════════════
 // APP STATE MANAGER
@@ -153,6 +147,21 @@ const App = {
     xpEarned: 0,
     startTime: 0,
     consecutiveCorrect: 0,
+  },
+
+  /**
+   * Escapa HTML para prevenir XSS.
+   * Usar siempre que se interpole datos de usuario en innerHTML.
+   * Igual que Engine._escapeHtml pero disponible en App sin dependencia circular.
+   */
+  _escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&')
+      .replace(/</g, '<')
+      .replace(/>/g, '>')
+      .replace(/"/g, '"')
+      .replace(/'/g, "\'");
   },
 
   // ─────────────────────────────────────
@@ -1135,65 +1144,50 @@ const App = {
       e.preventDefault();
       limpiarErrores();
 
-      const datos = {
-        name: campos.name.value.trim(),
-        email: campos.email.value.trim(),
-        subject: campos.subject.value.trim(),
-        message: campos.message.value.trim()
+      const C = window.Contact;
+      const entrada = {
+        name: campos.name.value,
+        email: campos.email.value,
+        subject: campos.subject.value,
+        message: campos.message.value
       };
 
-      // Validación con los mismos mínimos que el servidor
-      const fallos = [];
-      if (datos.name.length < CONTACT_CONFIG.min.name) fallos.push(['name', 'Escribe tu nombre.']);
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(datos.email)) fallos.push(['email', 'El email no parece válido.']);
-      if (datos.subject.length < CONTACT_CONFIG.min.subject) fallos.push(['subject', 'Escribe un asunto.']);
-      if (datos.message.length < CONTACT_CONFIG.min.message) fallos.push(['message', 'Cuéntanos un poco más.']);
-
-      if (fallos.length) {
-        fallos.forEach(([campo, texto]) => { campos[campo]?.classList.add('error'); });
-        this._contactStatus(estado, 'ko', fallos[0][1]);
-        campos[fallos[0][0]]?.focus();
+      // La validación vive en contact.js para que cliente y servidor
+      // compartan exactamente los mismos mínimos
+      const { ok, errores } = C.validar(entrada);
+      if (!ok) {
+        errores.forEach(er => campos[er.campo]?.classList.add('error'));
+        this._contactStatus(estado, 'ko', errores[0].texto);
+        campos[errores[0].campo]?.focus();
         return;
       }
 
       const boton = document.getElementById('contact-send');
       if (boton) { boton.disabled = true; boton.textContent = 'Enviando…'; }
 
-      const token = this.state.authToken || null;
-
       try {
-        const res = await fetch(CONTACT_CONFIG.apiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: 'Bearer ' + token } : {})
-          },
-          body: JSON.stringify(datos)
-        });
+        const r = await C.enviar(entrada, { token: this.state.authToken || null });
 
-        const cuerpo = await res.json().catch(() => ({}));
-
-        if (!res.ok) {
-          this._contactStatus(estado, 'ko', cuerpo.error || 'No se ha podido enviar. Inténtalo de nuevo.');
+        if (!r.ok) {
+          this._contactStatus(estado, 'ko', r.aviso);
           return;
         }
 
-        // El servidor guarda el mensaje siempre; que el email salga es aparte
-        if (cuerpo.sent) {
-          this._contactStatus(estado, 'ok', '¡Gracias! Te hemos enviado un email y te contestaremos pronto.');
-        } else {
-          this._contactStatus(estado, 'aviso',
-            'Mensaje guardado. El envío por email no está disponible ahora mismo, pero lo-has enviado igual.');
-        }
-        form.reset();
-        if (campos.name) campos.name.value = this.state.profile?.name || '';
+        const textos = {
+          api: '¡Gracias! Hemos recibido tu mensaje y te contestaremos pronto.',
+          form: '¡Gracias! Hemos recibido tu mensaje y te contestaremos pronto.',
+          mailto: 'Se ha abierto tu gestor de correo. Pulsa enviar y nos llegará a duckdev77@gmail.com.'
+        };
+        this._contactStatus(estado, r.via === 'mailto' ? 'aviso' : 'ok', textos[r.via] || 'Mensaje enviado.');
 
-      } catch (err) {
-        // Sin servidor: no se pierde, se guarda en localStorage
-        this._saveOfflineMessage(datos);
-        this._contactStatus(estado, 'aviso',
-          'Guardado en este navegador. Cuando el servidor esté en marcha se podrá enviar por email.');
-        form.reset();
+        // Con mailto el visitante puede querer corregir algo antes de pulsar
+        // enviar, así que el formulario se deja tal cual
+        if (r.via !== 'mailto') {
+          form.reset();
+          if (campos.name) campos.name.value = this.state.profile?.name || '';
+        }
+
+        if (r.aviso) this.showToast(r.aviso);
       } finally {
         if (boton) { boton.disabled = false; boton.textContent = 'Enviar mensaje'; }
       }
@@ -1205,18 +1199,6 @@ const App = {
     element.className = 'contact-status ' + tipo;
     element.textContent = texto;
     element.hidden = false;
-  },
-
-  /** Buzón local: si el servidor no está, el mensaje no se pierde. */
-  _saveOfflineMessage(datos) {
-    try {
-      const clave = CONTACT_CONFIG.storageKey;
-      const lista = JSON.parse(localStorage.getItem(clave) || '[]');
-      lista.push({ ...datos, createdAt: Date.now() });
-      localStorage.setItem(clave, JSON.stringify(lista));
-    } catch (e) {
-      // localStorage lleno o bloqueado: no es motivo para romper el envío
-    }
   },
 
   // ─────────────────────────────────────
