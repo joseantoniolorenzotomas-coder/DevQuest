@@ -44,7 +44,7 @@ describe('Contacto: configuración', () => {
     // FormSubmit está configurado por defecto para el buzón de DevQuest.
     assert.equal(C().API_URL ?? null, null);
     assert.equal(C().FORM_URL ?? null, null);
-    assert.equal(C().FORMSUBMIT_URL, 'https://formsubmit.co/ajax/duckdev77@gmail.com');
+    assert.equal(C().FORMSUBMIT_URL, 'https://formsubmit.co/ajax/807bf3bc6bb68e8037dea5648ae13d5d');
   });
 });
 
@@ -229,7 +229,7 @@ describe('Contacto: envío por la vía que toque', () => {
     assert.equal(r.ok, true);
     assert.equal(r.via, 'form');
     assert.equal(fetchImpl.llamadas.length, 1);
-    assert.equal(fetchImpl.llamadas[0].url, 'https://formsubmit.co/ajax/duckdev77@gmail.com');
+    assert.equal(fetchImpl.llamadas[0].url, 'https://formsubmit.co/ajax/807bf3bc6bb68e8037dea5648ae13d5d');
     assert.equal(fetchImpl.llamadas[0].opts.method, 'POST');
     assert.equal(fetchImpl.llamadas[0].opts.headers['Content-Type'], 'application/json');
     assert.deepEqual(JSON.parse(fetchImpl.llamadas[0].opts.body), {
@@ -271,7 +271,7 @@ describe('Contacto: envío por la vía que toque', () => {
     assert.deepEqual(usadas, [
       'https://api.example.com/contact',
       'https://formspree.io/f/abc',
-      'https://formsubmit.co/ajax/duckdev77@gmail.com'
+      'https://formsubmit.co/ajax/807bf3bc6bb68e8037dea5648ae13d5d'
     ]);
   });
 

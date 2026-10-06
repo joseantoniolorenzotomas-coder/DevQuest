@@ -193,7 +193,7 @@ Al final de la pantalla de **Perfil** hay un botón **"¿Tienes alguna consulta?
 |---|-----|---------------|--------------|
 | 1 | **API propia** | Si defines `DEVQUEST_API_URL` | Desplegar `server/` y configurar SMTP/Resend |
 | 2 | **Servicio alternativo** | Si defines `DEVQUEST_CONTACT_FORM_URL` | Cuenta en Formspree o similar |
-| 3 | **FormSubmit** | Por defecto, al buzón `duckdev77@gmail.com` | Servicio externo; puede requerir activar el buzón al primer uso |
+| 3 | **FormSubmit** | Por defecto, al buzón `duckdev77@gmail.com` | FormSubmit activado para este sitio con un identificador de formulario |
 | 4 | **`mailto:`** | Si fallan las anteriores | El visitante debe pulsar Enviar en su gestor |
 
 FormSubmit envía el formulario automáticamente desde GitHub Pages. Si el proveedor no está disponible o aún requiere activar el buzón, el último recurso es abrir el gestor de correo con un borrador; el formulario se conserva intacto.

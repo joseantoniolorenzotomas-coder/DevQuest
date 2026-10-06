@@ -4,7 +4,7 @@
 - v2.23.0. Cursos completos: **Python · JavaScript · HTML · CSS · SQL · Java · C++ · PHP · Go · TypeScript**. Todos los 10 cursos tienen contenido.
 - Volumen: Python 14m/40l/230e · JS 14m/43l/258e · HTML 14m/23l/138e · CSS 14m/25l/150e · SQL 14m/27l/162e · Java 14m/24l/144e · C++ 14m/25l/150e · PHP 12m/20l/120e · Go 14m/25l/161e · TypeScript 10m/22l/127e. **Total 134m/272l/1.640e.**
 - Frontend: **683** tests en verde. Servidor: 37 tests en verde. Total **720/720** (verificado con `npm run test:all`).
-- Formulario de contacto en el perfil → FormSubmit por defecto, al buzón duckdev77@gmail.com (mismo servicio del portfolio); alternativa de backend propio en `DEVQUEST_API_URL`, con SMTP/Resend configurado.
+- Formulario de contacto en el perfil → FormSubmit tokenizado por defecto, al buzón duckdev77@gmail.com (mismo servicio del portfolio); alternativa de backend propio en `DEVQUEST_API_URL`, con SMTP/Resend configurado.
 - **Modo administrador**: el logo del pato al final de la pantalla de Perfil (debajo de los logros), dentro de una firma con el nombre "PatoDev". Parece un logo de la app, pero abre el modal de la contraseña y activa el modo que abre todos los ejercicios para testear. No es seguridad: vive en el cliente y cualquiera puede llamar `App.setAdminMode(true)` desde la consola.
 - Liga con 12 bots de relleno (`LEAGUE_BOTS`), marcados con 🤖 y con aviso al pie.
 - Backend con cuenta real funcionando (registro, login, perfil, progreso, liga, recuperación de contraseña).

@@ -37,7 +37,7 @@ window.Contact = (function () {
    * después con window.DEVQUEST_CONTACT_FORM_URL = 'https://…'.
    */
   const FORM_URL = (typeof window !== 'undefined' && window.DEVQUEST_CONTACT_FORM_URL) || null;
-  const FORMSUBMIT_URL = 'https://formsubmit.co/ajax/' + DESTINO;
+  const FORMSUBMIT_URL = 'https://formsubmit.co/ajax/807bf3bc6bb68e8037dea5648ae13d5d';
 
   // Mismos mínimos que el servidor (server/src/contact.js)
   const MIN = { name: 2, email: 5, subject: 3, message: 10 };
