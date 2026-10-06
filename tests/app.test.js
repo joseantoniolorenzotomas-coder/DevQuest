@@ -10,7 +10,16 @@ await import('../curriculums/javascript.js');
 await import('../curriculums/html.js');
 await import('../curriculums/css.js');
 await import('../curriculums/sql.js');
+await import('../curriculums/java.js');
+await import('../curriculums/cpp.js');
+await import('../curriculums/php.js');
+await import('../curriculums/go.js');
+await import('../curriculums/typescript.js');
 await import('../sqlengine.js');
+await import('../javaengine.js');
+await import('../cppengine.js');
+await import('../phpengine.js');
+await import('../goengine.js');
 await import('../languages.js');
 await import('../engine.js');
 await import('../app.js');
@@ -106,6 +115,22 @@ describe('App', () => {
     test('debe cambiar de pantalla correctamente', () => {
       window.App.showScreen('languages');
       assert.equal(window.App.currentScreen, 'languages');
+    });
+
+    test('debe restablecer el scroll de la pantalla y la ventana al navegar', () => {
+      const pantalla = document.getElementById('screen-profile');
+      pantalla.scrollTop = 480;
+      let posicionVentana = null;
+      const scrollOriginal = window.scrollTo;
+      window.scrollTo = (...args) => { posicionVentana = args; };
+
+      try {
+        window.App.showScreen('profile');
+        assert.equal(pantalla.scrollTop, 0);
+        assert.deepEqual(posicionVentana, [0, 0]);
+      } finally {
+        window.scrollTo = scrollOriginal;
+      }
     });
 
     test('debe ocultar bottom-nav en welcome', () => {
@@ -364,12 +389,14 @@ describe('App', () => {
   });
 
   describe('Hub multilenguaje', () => {
-    test('debe registrar 10 lenguajes (5 con contenido, 5 próximamente)', () => {
+    test('debe registrar 10 lenguajes y todos con contenido', () => {
       assert.equal(window.LANGUAGES.length, 10);
       const disponibles = window.LANGUAGES.filter(l => !l.comingSoon);
       const bloqueados = window.LANGUAGES.filter(l => l.comingSoon);
-      assert.equal(disponibles.length, 5);
-      assert.equal(bloqueados.length, 5);
+      assert.equal(disponibles.length, 10);
+      // TypeScript sustituyó a Rust como décimo curso: ya no queda ninguno
+      // bloqueado, así que el hub enseña los diez con su contenido
+      assert.equal(bloqueados.length, 0);
     });
 
     test('los lenguajes con contenido tienen módulos de verdad', () => {
@@ -381,7 +408,7 @@ describe('App', () => {
 
     test('el orden debe ser natural: HTML y CSS antes de JavaScript, Java debajo de SQL', () => {
       const ids = window.LANGUAGES.map(l => l.id);
-      assert.deepEqual(ids, ['python', 'html', 'css', 'javascript', 'sql', 'java', 'cpp', 'php', 'go', 'rust']);
+      assert.deepEqual(ids, ['python', 'html', 'css', 'javascript', 'sql', 'java', 'cpp', 'php', 'go', 'typescript']);
     });
 
     test('cada lenguaje debe tener su resumen (about)', () => {

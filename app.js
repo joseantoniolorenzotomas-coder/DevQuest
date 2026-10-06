@@ -130,8 +130,8 @@ function generateUserId() {
 
 // ════════════════════════════════════════
 // CONTACTO
-// La lógica de envío vive en contact.js (tres vías: API propia, servicio
-// de formularios y mailto). Aquí solo se conecta el formulario al DOM.
+// La lógica de envío vive en contact.js (API propia, proveedor configurable,
+// FormSubmit por defecto y mailto como respaldo). Aquí solo se conecta el DOM.
 // ════════════════════════════════════════
 
 // ════════════════════════════════════════
@@ -291,7 +291,11 @@ const App = {
   showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     const screen = document.getElementById(`screen-${id}`);
-    if (screen) screen.classList.add('active');
+    if (screen) {
+      screen.classList.add('active');
+      screen.scrollTop = 0;
+    }
+    window.scrollTo(0, 0);
     this.currentScreen = id;
 
     const noNav = ['welcome', 'lesson', 'complete'];
@@ -359,8 +363,6 @@ const App = {
       this.showScreen('languages');
       this.renderLanguages();
       this.showToast(`¡Bienvenido, ${name}! 🐍`, 'success');
-      // Scroll al contenido de aprendizaje
-      setTimeout(() => this.scrollToElement('.languages-grid'), 300);
     };
 
     btn.addEventListener('click', startFn);

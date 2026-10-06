@@ -185,19 +185,20 @@ Si algún día un usuario real del servidor se llama igual que un bot, el bot se
 
 Al final de la pantalla de **Perfil** hay un botón **"¿Tienes alguna consulta? Contáctanos"**. Al pulsarlo se despliega un formulario con nombre, email, asunto y mensaje. Destino: **duckdev77@gmail.com**.
 
-#### Las tres vías de envío
+#### Las vías de envío
 
-**El sitio está en GitHub Pages, que es estático: allí no se ejecuta Node**, así que la carpeta `server/` no puede recibir nada desde la web publicada. Lo comprobé en el sitio real: un `fetch` a `localhost:3001` desde ahí falla siempre. Por eso el envío tiene tres vías y se prueba en orden, parando en la primera que funciona:
+**El sitio está en GitHub Pages, que es estático: allí no se ejecuta Node**, así que la carpeta `server/` no puede recibir nada desde la web publicada. El formulario usa FormSubmit de forma predeterminada, igual que el portfolio; también admite un backend propio o un servicio de formularios configurado. Las vías se prueban en orden, parando en la primera que funciona:
 
 | # | Vía | Cuándo se usa | Qué necesita |
 |---|-----|---------------|--------------|
-| 1 | **API propia** | Si defines `DEVQUEST_API_URL` | Desplegar `server/` donde corra Node |
-| 2 | **Servicio de formularios** | Si defines `DEVQUEST_CONTACT_FORM_URL` | Cuenta en Formspree o similar (plan gratuito) |
-| 3 | **`mailto:`** | Siempre, si nada más funciona | Nada |
+| 1 | **API propia** | Si defines `DEVQUEST_API_URL` | Desplegar `server/` y configurar SMTP/Resend |
+| 2 | **Servicio alternativo** | Si defines `DEVQUEST_CONTACT_FORM_URL` | Cuenta en Formspree o similar |
+| 3 | **FormSubmit** | Por defecto, al buzón `duckdev77@gmail.com` | Servicio externo; puede requerir activar el buzón al primer uso |
+| 4 | **`mailto:`** | Si fallan las anteriores | El visitante debe pulsar Enviar en su gestor |
 
-La vía 3 **funciona sin configurar nada**: abre el gestor de correo del visitante con el mensaje ya escrito y listo para enviar a tu buzón. Sin servidor y sin terceros. Si el visitante cierra la ventana no se pierde nada, porque el formulario se conserva intacto.
+FormSubmit envía el formulario automáticamente desde GitHub Pages. Si el proveedor no está disponible o aún requiere activar el buzón, el último recurso es abrir el gestor de correo con un borrador; el formulario se conserva intacto.
 
-Para activar la vía 1 o 2, descomenta la línea correspondiente **antes de `contact.js`** en `index.html` (el propio archivo lo explica en un comentario):
+Para usar la vía 1 o 2, define la URL correspondiente **antes de `contact.js`** en `index.html`:
 
 ```html
 <!-- A) Servicio de formularios: llega al buzón sin que nadie abra nada -->

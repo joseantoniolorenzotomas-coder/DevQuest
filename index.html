@@ -487,22 +487,23 @@
 <script src="goengine.js"></script>
 <script src="tsengine.js"></script>
 <!-- ══════════════════════════════════════ -->
-<!-- CONFIGURACIÓN OPCIONAL DEL CONTACTO     -->
-<!-- GitHub Pages es estático: no ejecuta     -->
-<!-- Node, así que server/ no puede recibir   -->
-<!-- nada desde aquí. Por defecto el          -->
-<!-- formulario usa mailto:, que siempre      -->
-<!-- funciona.                                 -->
+<!-- CONFIGURACIÓN DEL CONTACTO               -->
+<!-- GitHub Pages es estático: para enviar    -->
+<!-- automáticamente, despliega server/ con  -->
+<!-- SMTP configurado y define la URL pública -->
+<!-- de /api/contact. Sin API, se abre un     -->
+<!-- borrador mailto que el usuario debe      -->
+<!-- enviar desde su gestor de correo.         -->
 <!--                                           -->
-<!-- Para recibir los mensajes en el buzón sin -->
-<!-- que el visitante use su gestor de correo, -->
-<!-- define UNA de estas dos líneas ANTES de   -->
-<!-- cargar contact.js:                       -->
+<!-- FormSubmit queda configurado por defecto  -->
+<!-- para duckdev77@gmail.com. Si prefieres    -->
+<!-- otro servicio, define una URL antes de   -->
+<!-- cargar contact.js:                        -->
 <!--                                           -->
-<!--   A) Servicio de formularios (2 minutos): -->
+<!--   A) Servicio de formularios alternativo: -->
 <!--   <script>window.DEVQUEST_CONTACT_FORM_URL = 'https://formspree.io/f/TU_ID';</script> -->
 <!--                                           -->
-<!--   B) Tu backend Node, si lo despliegas:   -->
+<!--   B) Backend Node propio, si lo despliegas:-->
 <!--   <script>window.DEVQUEST_API_URL = 'https://tu-servidor.com/api/contact';</script> -->
 <!-- ========================================= -->
 <script src="contact.js"></script>

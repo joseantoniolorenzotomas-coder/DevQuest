@@ -11,10 +11,16 @@ const toInt = (value, fallback) => {
 export const config = {
   port: toInt(process.env.PORT, 3001),
   dbPath: process.env.SQLITE_PATH || new URL('../devquest.db', import.meta.url).pathname,
-  jwtSecret: process.env.JWT_SECRET || 'dev-secret-cambialo-en-produccion',
+  // JWT_SECRET es OBLIGATORIO en producción. En desarrollo usa un valor por defecto.
+  jwtSecret: process.env.NODE_ENV === 'production'
+    ? (process.env.JWT_SECRET ?? (() => { throw new Error('JWT_SECRET requerido en producción'); })())
+    : (process.env.JWT_SECRET || 'dev-secret-cambialo-en-produccion'),
   jwtExpiresSeconds: toInt(process.env.JWT_EXPIRES_SECONDS, 7 * 24 * 3600),
   resetTokenHours: toInt(process.env.RESET_TOKEN_HOURS, 1),
-  corsOrigin: process.env.CORS_ORIGIN || '*',
+  // CORS wildcard '*' solo en desarrollo. En producción definir CORS_ORIGIN.
+  corsOrigin: process.env.NODE_ENV === 'production'
+    ? (process.env.CORS_ORIGIN ?? (() => { throw new Error('CORS_ORIGIN requerido en producción'); })())
+    : (process.env.CORS_ORIGIN || '*'),
   // Rate-limit simple en memoria (solo endpoints de auth)
   rateLimitWindowMs: toInt(process.env.RATE_LIMIT_WINDOW_MS, 60_000),
   rateLimitMax: toInt(process.env.RATE_LIMIT_MAX, 30),
@@ -35,7 +41,3 @@ export const config = {
   contactTo: process.env.CONTACT_TO || 'duckdev77@gmail.com',
   publicBaseUrl: process.env.PUBLIC_BASE_URL || 'http://localhost:3000',
 };
-
-if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
-  console.warn('[devquest-server] AVISO: JWT_SECRET no definido en producción. Define JWT_SECRET.');
-}

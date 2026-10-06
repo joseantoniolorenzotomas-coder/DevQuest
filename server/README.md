@@ -29,6 +29,7 @@ Variables (ver `.env.example`):
 | PUT | `/api/me` | Bearer | `{name}` → perfil actualizado |
 | POST | `/api/progress` | Bearer | `{xp, level}` → perfil actualizado (para el ranking) |
 | GET | `/api/leaderboard?limit=20` | no | Top por xp (sin emails ni hashes) |
+| POST | `/api/contact` | no | Guarda un mensaje y trata de enviarlo por email |
 
 Ejemplo:
 
@@ -41,6 +42,12 @@ curl -X POST localhost:3001/api/auth/register \
 ## Recuperación de contraseña (estado actual)
 
 `POST /api/auth/forgot` genera un token de un solo uso (1h, guardado con hash) y responde 200 siempre. En desarrollo devuelve `devToken` para probar el flujo sin SMTP. El envío real por email queda pendiente: configura `SMTP_HOST` y completa el TODO en `src/users.js`.
+
+## Formulario de contacto
+
+El formulario del frontend puede enviar `{name, email, subject, message}` a `POST /api/contact`. El servidor guarda cada mensaje en SQLite y lo envía a `CONTACT_TO` (por defecto `duckdev77@gmail.com`) si se configura un proveedor de correo. Define `SMTP_HOST` y sus credenciales `SMTP_*`, o `RESEND_API_KEY`, en el entorno del servidor. Sin proveedor, el mensaje queda guardado y la respuesta informa que no se envió el email. El frontend estático utiliza FormSubmit por defecto, por lo que no necesita este backend para el envío normal.
+
+Para habilitar el envío automático desde el frontend estático, configura `window.DEVQUEST_API_URL` antes de cargar `contact.js`, apuntando a la URL pública del endpoint, por ejemplo `https://api.ejemplo.com/api/contact`. Define también `CORS_ORIGIN` con el origen real de la app. Sin esa URL, el formulario abre un borrador en el gestor de correo del visitante; este debe pulsar Enviar.
 
 ## Por qué es rápido y escalable
 

@@ -374,4 +374,5 @@ export function syncGlobals() {
   if (window.CURRICULUM) global.CURRICULUM = window.CURRICULUM;
   if (window.Engine) global.Engine = window.Engine;
   if (window.App) global.App = window.App;
+  if (window.Contact) global.Contact = window.Contact;
 }

@@ -3,8 +3,9 @@ import { test, describe, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { resetMocks, mockSkulpt, syncGlobals } from './setup.js';
 
-// Cargar engine.js
+// Cargar engine.js (y app.js, que pinta la solución del feedback)
 await import('../engine.js');
+await import('../app.js');
 syncGlobals();
 
 describe('Engine', () => {
@@ -173,6 +174,135 @@ describe('Engine', () => {
       const result = await window.Engine.validate({ type: 'type-code' });
       assert.equal(result.correct, false);
       assert.match(result.message, /ejecuta/i);
+    });
+
+    test('el fill-blank muestra la pregunta del ejercicio', () => {
+      // Fallo real: el renderer ponía un texto genérico y descartaba la
+      // pregunta del ejercicio. El alumno veía "100 ___ 37" sin saber si
+      // tenía que sumar o restar, y los 235 ejercicios se volvían acertijos.
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+
+      window.Engine._renderFillBlank({
+        type: 'fill-blank',
+        question: 'Calcula 100 menos 37:',
+        code: 'resultado = 100 ___ 37\nprint(resultado)',
+        blanks: ['-'],
+        options: ['-', '+', '*', '/']
+      }, container);
+
+      // El mock no agrega textContent, así que se lee el primer hijo creado,
+      // que es el div de la pregunta
+      const pregunta = container.children[0];
+      assert.ok(pregunta, 'debe crear el div de la pregunta');
+      assert.equal(pregunta.textContent, 'Calcula 100 menos 37:');
+      assert.ok(!pregunta.textContent.includes('Selecciona las palabras correctas'),
+        'el texto genérico ha vuelto');
+    });
+
+    test('el fill-blank sin pregunta usa un texto que al menos orienta', () => {
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+
+      window.Engine._renderFillBlank({
+        type: 'fill-blank',
+        code: 'x = ___',
+        blanks: ['1'],
+        options: ['1', '2']
+      }, container);
+
+      const pregunta = container.children[0];
+      assert.ok(pregunta && pregunta.textContent.length > 0,
+        'debe poner algo aunque el ejercicio no tenga pregunta');
+    });
+
+    test('el comodín {{...}} acepta el nombre que elija el alumno', () => {
+      // Fallo real: el ejercicio de la tarjeta de presentación traía el
+      // nombre del autor cocido en el expected, así que un alumno que
+      // escribiera su propio nombre suspendía sin tener nada mal.
+      const esperado = 'Nombre: {{tu nombre}}\nLenguaje favorito: Python\nNivel: Principiante\n';
+
+      assert.equal(window.Engine._coincideSalida(esperado,
+        'Nombre: Jose\nLenguaje favorito: Python\nNivel: Principiante\n'), true,
+      'debe aceptar el nombre del alumno');
+
+      assert.equal(window.Engine._coincideSalida(esperado,
+        'Nombre: Ana\nLenguaje favorito: Python\nNivel: Principiante\n'), true);
+
+      assert.equal(window.Engine._coincideSalida(esperado,
+        'Nombre: Python\nLenguaje favorito: Python\nNivel: Principiante\n'), true,
+      'el nombre del autor también vale');
+    });
+
+    test('el comodín no relaja nada más', () => {
+      const esperado = 'Nombre: {{tu nombre}}\nLenguaje favorito: Python\nNivel: Principiante\n';
+
+      // El resto de la línea sigue siendo exacto
+      assert.equal(window.Engine._coincideSalida(esperado,
+        'Nombre: Jose\nLenguaje favorito: Java\nNivel: Principiante\n'), false);
+      // Un nombre vacío no sirve
+      assert.equal(window.Engine._coincideSalida(esperado,
+        'Nombre: \nLenguaje favorito: Python\nNivel: Principiante\n'), false);
+      // Ni una línea de más o de menos
+      assert.equal(window.Engine._coincideSalida(esperado,
+        'Nombre: Jose\nLenguaje favorito: Python\n'), false);
+      assert.equal(window.Engine._coincideSalida(esperado,
+        'Nombre: Jose\nLenguaje favorito: Python\nNivel: Principiante\nExtra\n'), false);
+    });
+
+    test('sin comodín la comparación sigue siendo exacta', () => {
+      assert.equal(window.Engine._coincideSalida('hola\n', 'hola\n'), true);
+      assert.equal(window.Engine._coincideSalida('hola\n', 'adios\n'), false);
+      assert.equal(window.Engine._coincideSalida('a\nb\n', 'a\nb\n'), true);
+      assert.equal(window.Engine._coincideSalida('a\nb\n', 'a b\n'), false);
+    });
+
+    test('type-code valida con comodines', async () => {
+      const salida = document.getElementById('code-output');
+      salida.dataset.lastOutput = 'Nombre: Jose\nLenguaje favorito: Python\nNivel: Principiante\n';
+      delete salida.dataset.hadError;
+      document.getElementById('code-editor').value = 'print("Nombre: Jose")';
+
+      const r = await window.Engine.validate({
+        type: 'type-code',
+        explanation: 'da igual el nombre',
+        solution: 'print("Nombre: Ana")',
+        tests: [{ expected: 'Nombre: {{tu nombre}}\nLenguaje favorito: Python\nNivel: Principiante\n' }]
+      });
+      assert.equal(r.correct, true, 'debe aceptar un nombre distinto al de la solución');
+    });
+
+    test('si el código da error, Comprobar enseña la solución y no un aviso', async () => {
+      // Requisito del temario: al fallar siempre se explica cómo se resuelve.
+      // Un error del intérprete también es un fallo, así que debe llegar al
+      // panel de feedback con la solución, no con un "ejecuta el código".
+      // El mock de getElementById crea el elemento si no existe, así que se
+    // rellenan los datos a través de él en vez de con appendChild
+      const salida = document.getElementById('code-output');
+      salida.dataset.lastOutput = 'Error de Java: Línea 3: no se encuentra la clase "Producto".';
+      salida.dataset.hadError = '1';
+
+      const editor = document.getElementById('code-editor');
+      editor.value = 'Producto p = new Producto();';
+
+      const result = await window.Engine.validate({
+        type: 'type-code',
+        explanation: 'Hay que declarar la clase.',
+        solution: 'class Producto { String nombre; }',
+        tests: [{ expected: 'ok\n' }]
+      });
+
+      assert.equal(result.correct, false);
+      assert.equal(result.message, undefined, 'no debe salir el aviso de "ejecuta el código"');
+      assert.match(result.explanation, /Hay que declarar la clase/);
+      assert.match(result.explanation, /no se encuentra la clase/,
+        'el aviso del intérprete debe acompañar a la explicación');
+
+      const app = window.App;
+      assert.ok(app._correctAnswerHtml({
+        type: 'type-code',
+        solution: 'class Producto { String nombre; }'
+      }).includes('Producto'), 'y el panel debe poder pintar la solución');
     });
   });
 

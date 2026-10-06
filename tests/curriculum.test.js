@@ -9,7 +9,11 @@ await import('../curriculums/javascript.js');
 await import('../curriculums/html.js');
 await import('../curriculums/css.js');
 await import('../curriculums/sql.js');
+await import('../curriculums/java.js');
+await import('../curriculums/cpp.js');
 await import('../sqlengine.js');
+await import('../javaengine.js');
+await import('../cppengine.js');
 await import('../engine.js');
 await import('../app.js');
 
@@ -21,6 +25,16 @@ const decodeEntities = (s) => s
   .replace(/&copy;/g, '©')
   .replace(/&eacute;/g, 'é')
   .replace(/&nbsp;/g, ' ');
+
+/**
+ * Comprueba que la salida de una solución es la que el ejercicio espera.
+ *
+ * Usa la misma función que la app (Engine._coincideSalida) a propósito: si el
+ * test y la app comprobaran de manera distinta, un ejercicio sería "correcto"
+ * en los tests y "incorrecto" para el alumno. Así fue como se colaron los
+ * ejercicios que pedían un nombre personal con un nombre fijo.
+ */
+const coincideSalida = (esperado, real) => window.Engine._coincideSalida(esperado, real);
 
 describe('Curriculum', () => {
   beforeEach(() => {
@@ -299,7 +313,8 @@ describe('Curriculum', () => {
     for (const ex of typeCodes) {
       const result = await runCode.call(window.Engine, 'javascript', ex.solution);
       assert.equal(result.error, false, `${ex.id}: la solución da error: ${result.output}`);
-      assert.equal(result.output, ex.tests[0].expected, `${ex.id}: la solución no produce lo esperado`);
+      assert.ok(coincideSalida(ex.tests[0].expected, result.output),
+        `${ex.id}: la solución no produce lo esperado`);
     }
   });
 
@@ -411,7 +426,8 @@ describe('Curriculum', () => {
     for (const ex of typeCodes) {
       const result = await window.Engine.runCss(ex.solution);
       assert.equal(result.error, false, `${ex.id}: error al analizar`);
-      assert.equal(result.output, ex.tests[0].expected, `${ex.id}: la solución no produce la regla esperada`);
+      assert.ok(coincideSalida(ex.tests[0].expected, result.output),
+        `${ex.id}: la solución no produce la regla esperada`);
     }
   });
 
@@ -449,7 +465,9 @@ describe('Curriculum', () => {
       ['javascript', window.JS_CURRICULUM],
       ['html', window.HTML_CURRICULUM],
       ['css', window.CSS_CURRICULUM],
-      ['sql', window.SQL_CURRICULUM]
+      ['sql', window.SQL_CURRICULUM],
+      ['java', window.JAVA_CURRICULUM],
+      ['cpp', window.CPP_CURRICULUM]
     ];
     curricula.forEach(([lang, mods]) => mods.forEach(m => m.lessons.forEach(l => l.exercises.forEach(ex => {
       const app = window.App;
@@ -560,7 +578,8 @@ describe('Curriculum', () => {
     for (const ex of typeCodes) {
       const result = window.SQL_ENGINE.ejecutar(ex.solution);
       assert.equal(result.error, false, `${ex.id}: la solución da error: ${result.output}`);
-      assert.equal(result.output, ex.tests[0].expected, `${ex.id}: la solución no produce la salida esperada`);
+      assert.ok(coincideSalida(ex.tests[0].expected, result.output),
+        `${ex.id}: la solución no produce la salida esperada`);
     }
   });
 
@@ -602,6 +621,301 @@ describe('Curriculum', () => {
     assert.ok(comprobadas > 10, 'deben comprobarse bastantes ejercicios');
   });
 
+  // ───────────────────────────────────────
+  // JAVA
+  // ───────────────────────────────────────
+  test('Java tiene el volumen esperado (14 módulos · 24 lecciones · 144 ejercicios)', () => {
+    const modules = window.JAVA_CURRICULUM;
+    const lessons = modules.flatMap(m => m.lessons);
+    const exercises = lessons.flatMap(l => l.exercises);
+    assert.equal(modules.length, 14);
+    assert.equal(lessons.length, 24);
+    assert.equal(exercises.length, 144);
+  });
+
+  test('cada ejercicio de Java cumple las reglas de su tipo', () => {
+    window.JAVA_CURRICULUM.forEach(m => m.lessons.forEach(l => l.exercises.forEach(ex => {
+      assert.ok(ex.xp > 0, `${ex.id}: debe tener xp`);
+      // La explicación es obligatoria en TODOS los tipos: al fallar siempre
+      // debe explicar el porqué, que es la regla del temario
+      assert.ok(ex.explanation && ex.explanation.length > 0, `${ex.id}: debe tener explanation`);
+      if (ex.type === 'multiple-choice') {
+        assert.ok(ex.choices.length >= 2, `${ex.id}: mínimo 2 opciones`);
+        assert.ok(ex.correct >= 0 && ex.correct < ex.choices.length, `${ex.id}: correct fuera de rango`);
+        assert.equal(new Set(ex.choices).size, ex.choices.length,
+          `${ex.id}: dos opciones idénticas, el alumno no puede elegir`);
+      }
+      if (ex.type === 'fill-blank') {
+        const holes = (ex.code.match(/___/g) || []).length;
+        assert.equal(holes, ex.blanks.length, `${ex.id}: nº de huecos distinto de blanks`);
+        assert.ok(ex.options.length >= ex.blanks.length, `${ex.id}: faltan opciones`);
+        // Solo puede haber una opción correcta: si dos valen, el alumno no sabe
+        const correctas = ex.options.filter(o => o === ex.blanks[0]);
+        assert.equal(correctas.length, 1, `${ex.id}: más de una opción correcta`);
+        assert.equal(new Set(ex.options).size, ex.options.length,
+          `${ex.id}: dos opciones idénticas`);
+      }
+      if (ex.type === 'predict-output') {
+        assert.ok(ex.correctOutput >= 0 && ex.correctOutput < ex.output.length,
+          `${ex.id}: correctOutput fuera de rango`);
+      }
+      if (ex.type === 'type-code') {
+        assert.ok(ex.tests.length > 0, `${ex.id}: debe tener tests`);
+        assert.ok(ex.solution && ex.solution.length > 0, `${ex.id}: debe tener solution`);
+      }
+    })));
+  });
+
+  test('las soluciones de Java producen exactamente la salida esperada', () => {
+    const typeCodes = [];
+    window.JAVA_CURRICULUM.forEach(m => m.lessons.forEach(l => l.exercises.forEach(ex => {
+      if (ex.type === 'type-code') typeCodes.push(ex);
+    })));
+    assert.ok(typeCodes.length > 0);
+    for (const ex of typeCodes) {
+      const r = window.JAVA_ENGINE.ejecutar(ex.solution);
+      assert.equal(r.error, false, `${ex.id}: la solución da error: ${r.output}`);
+      assert.ok(coincideSalida(ex.tests[0].expected, r.output),
+        `${ex.id}: la solución no produce la salida esperada`);
+    }
+  });
+
+  test('los predict-output de Java se ejecutan (o fallan a propósito)', () => {
+    // predict-output es la respuesta corta, no la salida entera: no se
+    // compara carácter a carácter, pero sí se ejecuta el código para
+    // comprobar que no está roto.
+    let ejecutados = 0;
+    window.JAVA_CURRICULUM.forEach(m => m.lessons.forEach(l => l.exercises.forEach(ex => {
+      if (ex.type !== 'predict-output') return;
+      const r = window.JAVA_ENGINE.ejecutar(ex.codeToRun);
+      if (ex.expectError) {
+        assert.equal(r.error, true, `${ex.id}: se esperaba un error`);
+        assert.match(r.output, /^Error de Java:/, `${ex.id}: el error debe explicarse`);
+      } else {
+        assert.equal(r.error, false, `${ex.id}: el código da error: ${r.output}`);
+      }
+      ejecutados++;
+    })));
+    assert.ok(ejecutados > 15, 'deben comprobarse bastantes ejercicios');
+  });
+
+  test('la opción correcta de predict-output aparece en la salida real', () => {
+    // Igual que en SQL: la opción es una abreviatura, pero tiene que ser
+    // coherente con lo que el programa imprime de verdad.
+    const norm = (s) => String(s)
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ').trim();
+
+    let comprobadas = 0;
+    window.JAVA_CURRICULUM.forEach(m => m.lessons.forEach(l => l.exercises.forEach(ex => {
+      if (ex.type !== 'predict-output' || ex.expectError) return;
+      const r = window.JAVA_ENGINE.ejecutar(ex.codeToRun);
+      assert.equal(r.error, false, `${ex.id}: el código da error: ${r.output}`);
+
+      const lineas = r.output.replace(/\n$/, '').split('\n').map(norm).filter(Boolean);
+      if (lineas.includes('(el programa no imprime nada)')) return;
+
+      const opcion = norm(ex.output[ex.correctOutput]);
+      const coincide = lineas.some(f => f === opcion)
+        || lineas.some(f => f.includes(opcion))
+        || lineas.every(f => opcion.includes(f))
+        // O que cada palabra con sentido de la opción aparezca en el resultado
+        || opcion.split(/\s+/).filter(p => p.length >= 3 && !/^\d+$/.test(p))
+          .every(p => lineas.some(f => f.includes(p)));
+      assert.ok(coincide,
+        `${ex.id}: la opción correcta dice "${ex.output[ex.correctOutput]}" y el programa imprime ${JSON.stringify(lineas)}`);
+      comprobadas++;
+    })));
+    assert.ok(comprobadas > 10, 'deben comprobarse bastantes ejercicios');
+  });
+
+  // ───────────────────────────────────────
+  // C++
+  // ───────────────────────────────────────
+  test('C++ tiene el volumen esperado (14 módulos · 25 lecciones · 150 ejercicios)', () => {
+    const modules = window.CPP_CURRICULUM;
+    const lessons = modules.flatMap(m => m.lessons);
+    const exercises = lessons.flatMap(l => l.exercises);
+    assert.equal(modules.length, 14);
+    assert.equal(lessons.length, 25);
+    assert.equal(exercises.length, 150);
+  });
+
+  test('cada ejercicio de C++ cumple las reglas de su tipo', () => {
+    window.CPP_CURRICULUM.forEach(m => m.lessons.forEach(l => l.exercises.forEach(ex => {
+      assert.ok(ex.xp > 0, `${ex.id}: debe tener xp`);
+      assert.ok(ex.explanation && ex.explanation.length > 0, `${ex.id}: debe tener explanation`);
+      if (ex.type === 'multiple-choice') {
+        assert.ok(ex.choices.length >= 2, `${ex.id}: mínimo 2 opciones`);
+        assert.ok(ex.correct >= 0 && ex.correct < ex.choices.length, `${ex.id}: correct fuera de rango`);
+        assert.equal(new Set(ex.choices).size, ex.choices.length,
+          `${ex.id}: dos opciones idénticas`);
+      }
+      if (ex.type === 'fill-blank') {
+        const holes = (ex.code.match(/___/g) || []).length;
+        assert.equal(holes, ex.blanks.length, `${ex.id}: nº de huecos distinto de blanks`);
+        assert.ok(ex.options.length >= ex.blanks.length, `${ex.id}: faltan opciones`);
+        const correctas = ex.options.filter(o => o === ex.blanks[0]);
+        assert.equal(correctas.length, 1, `${ex.id}: más de una opción correcta`);
+        assert.equal(new Set(ex.options).size, ex.options.length, `${ex.id}: dos opciones idénticas`);
+      }
+      if (ex.type === 'predict-output') {
+        assert.ok(ex.correctOutput >= 0 && ex.correctOutput < ex.output.length,
+          `${ex.id}: correctOutput fuera de rango`);
+      }
+      if (ex.type === 'type-code') {
+        assert.ok(ex.tests.length > 0, `${ex.id}: debe tener tests`);
+        assert.ok(ex.solution && ex.solution.length > 0, `${ex.id}: debe tener solution`);
+      }
+    })));
+  });
+
+  test('las soluciones de C++ producen exactamente la salida esperada', () => {
+    const typeCodes = [];
+    window.CPP_CURRICULUM.forEach(m => m.lessons.forEach(l => l.exercises.forEach(ex => {
+      if (ex.type === 'type-code') typeCodes.push(ex);
+    })));
+    assert.ok(typeCodes.length > 0);
+    for (const ex of typeCodes) {
+      const r = window.CPP_ENGINE.ejecutar(ex.solution);
+      assert.equal(r.error, false, `${ex.id}: la solución da error: ${r.output}`);
+      assert.ok(coincideSalida(ex.tests[0].expected, r.output),
+        `${ex.id}: la solución no produce la salida esperada`);
+    }
+  });
+
+  test('los ejercicios de new/delete de C++ exigen liberar la memoria', () => {
+    // Sin esto, un alumno que se salta el delete aprueba igual, porque la
+    // salida es la misma: el ejercicio no enseñaría lo que dice enseñar.
+    const conNew = [];
+    window.CPP_CURRICULUM.forEach(m => m.lessons.forEach(l => l.exercises.forEach(ex => {
+      if (ex.type === 'type-code' && /\bnew\b/.test(ex.solution)) conNew.push(ex);
+    })));
+    assert.ok(conNew.length > 0, 'debería haber ejercicios con new');
+    for (const ex of conNew) {
+      assert.ok(ex.tests[0].contains, `${ex.id}: usa new pero no exige nada sobre el delete`);
+      assert.ok(ex.solution.includes(ex.tests[0].contains),
+        `${ex.id}: la solución no contiene "${ex.tests[0].contains}"`);
+    }
+  });
+
+  test('los predict-output de C++ se ejecutan (o fallan a propósito)', () => {
+    let ejecutados = 0;
+    window.CPP_CURRICULUM.forEach(m => m.lessons.forEach(l => l.exercises.forEach(ex => {
+      if (ex.type !== 'predict-output') return;
+      const r = window.CPP_ENGINE.ejecutar(ex.codeToRun);
+      if (ex.expectError) {
+        assert.equal(r.error, true, `${ex.id}: se esperaba un error`);
+        assert.match(r.output, /^Error de C\+\+/, `${ex.id}: el error debe explicarse`);
+      } else {
+        assert.equal(r.error, false, `${ex.id}: el código da error: ${r.output}`);
+      }
+      ejecutados++;
+    })));
+    assert.ok(ejecutados > 15, 'deben comprobarse bastantes ejercicios');
+  });
+
+  test('la opción correcta de predict-output cuadra con la salida real', () => {
+    const norm = (s) => String(s)
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ').trim();
+
+    let comprobadas = 0;
+    window.CPP_CURRICULUM.forEach(m => m.lessons.forEach(l => l.exercises.forEach(ex => {
+      if (ex.type !== 'predict-output' || ex.expectError) return;
+      const r = window.CPP_ENGINE.ejecutar(ex.codeToRun);
+      assert.equal(r.error, false, `${ex.id}: el código da error: ${r.output}`);
+
+      const lineas = r.output.replace(/\n$/, '').split('\n').map(norm).filter(Boolean);
+      if (lineas.includes('(el programa no imprime nada)')) return;
+
+      const opcion = norm(ex.output[ex.correctOutput]);
+      const coincide = lineas.some(f => f === opcion)
+        || lineas.some(f => f.includes(opcion))
+        || lineas.every(f => opcion.includes(f))
+        || opcion.split(/\s+/).filter(p => p.length >= 3 && !/^\d+$/.test(p))
+          .every(p => lineas.some(f => f.includes(p)));
+      assert.ok(coincide,
+        `${ex.id}: la opción correcta dice "${ex.output[ex.correctOutput]}" y el programa imprime ${JSON.stringify(lineas)}`);
+      comprobadas++;
+    })));
+    assert.ok(comprobadas > 10, 'deben comprobarse bastantes ejercicios');
+  });
+
+  test('ningún ejercicio de código se queda sin saber qué tiene que hacer', () => {
+    // Fallo real de autoría: había huecos de operadores con preguntas que no
+    // dejaban claro cuál era ("Completa el contador" con un while por debajo,
+    // donde no se sabe si el bucle llega o no al último número). Con cuatro
+    // opciones de operadores, eso es una adivinanza, no un ejercicio.
+    //
+    // Solo se miran los huecos que son operadores o símbolos: una palabra
+    // como "print" o "public" no admite más de una respuesta razonable.
+    const OPERADORES = /^[+\-*/%=<>!&|^~:,;]+$/;
+    // Palabras que explican qué hace el código y dan la pista necesaria
+    const PISTAS = /(suma|sumar|restar|resta|menos|más|multiplic|divide|dividir|divisi[oó]n|entera|compar|igual|mayor|menor|entre|asigna|coloca|coma|punto y coma|espacio|termina|cierra|abre|concatena|une|añade|agrega|comentario|direcci[oó]n|apunta|potencia|elevado|insensible|pendiente|carnet|acepta|obligatorio|ancho|antes de|hasta|incluyendo|no solo|solo si|lee)/i;
+
+    const sinPista = [];
+    const curricula = [
+      ['python', window.CURRICULUM.modules],
+      ['javascript', window.JS_CURRICULUM],
+      ['html', window.HTML_CURRICULUM],
+      ['css', window.CSS_CURRICULUM],
+      ['sql', window.SQL_CURRICULUM],
+      ['java', window.JAVA_CURRICULUM],
+      ['cpp', window.CPP_CURRICULUM]
+    ];
+
+    curricula.forEach(([lang, mods]) => mods.forEach(m => m.lessons.forEach(l => l.exercises.forEach(ex => {
+      if (ex.type !== 'fill-blank') return;
+
+      if (!ex.question || !ex.question.trim()) {
+        sinPista.push(`${lang}/${ex.id}: sin pregunta`);
+        return;
+      }
+      const hayOperador = (ex.blanks || []).some(b => OPERADORES.test(String(b).trim()));
+      if (!hayOperador) return;
+      if (!PISTAS.test(ex.question)) {
+        sinPista.push(`${lang}/${ex.id}: "${ex.question}" con hueco ${JSON.stringify(ex.blanks)}`);
+      }
+    }))));
+
+    assert.equal(sinPista.length, 0,
+      `estos ejercicios no dicen qué tiene que hacer el código:\n  ${sinPista.join('\n  ')}`);
+  });
+
+  test('los ejercicios que piden un dato personal lo dejan libre', () => {
+    // Fallo real de autoría, cuatro veces: la tarjeta de presentación de
+    // Python y JavaScript, y los ejercicios de "imprime tu nombre" de Java y
+    // C++. Traían el nombre del autor metido en el expected, así que un
+    // alumno que escribiera el suyo suspendía sin tener nada mal.
+    //
+    // Aquí no se busca un nombre concreto (cualquiera vale), sino que la
+    // línea con el nombre lleve el comodín.
+    const datos = /(?:^|\n)#{0,3}\s*(?:tu nombre|mi nombre|nombre)\b.*$/i;
+    const suspendidos = [];
+    const curricula = [
+      ['python', window.CURRICULUM.modules],
+      ['javascript', window.JS_CURRICULUM],
+      ['java', window.JAVA_CURRICULUM],
+      ['cpp', window.CPP_CURRICULUM]
+    ];
+
+    curricula.forEach(([lang, mods]) => mods.forEach(m => m.lessons.forEach(l => l.exercises.forEach(ex => {
+      if (ex.type !== 'type-code') return;
+      if (!datos.test(ex.description || '')) return;
+
+      const esperado = String(ex.tests[0].expected || '');
+      if (!esperado.includes('{{')) {
+        suspendidos.push(`${lang}/${ex.id}`);
+      }
+    }))));
+
+    assert.equal(suspendidos.length, 0,
+      `estos ejercicios piden un nombre personal pero lo fijan: ${suspendidos.join(', ')}`);
+  });
+
   test('el texto de los currículums no tiene caracteres de otro alfabeto', () => {
     // Fallo real de autoría: se colaron caracteres chinos/rusos en el español
     const raros = /[\u2E80-\u9FFF\uAC00-\uD7AF\u0400-\u04FF\u3040-\u30FF]/;
@@ -610,7 +924,9 @@ describe('Curriculum', () => {
       ['javascript', window.JS_CURRICULUM],
       ['html', window.HTML_CURRICULUM],
       ['css', window.CSS_CURRICULUM],
-      ['sql', window.SQL_CURRICULUM]
+      ['sql', window.SQL_CURRICULUM],
+      ['java', window.JAVA_CURRICULUM],
+      ['cpp', window.CPP_CURRICULUM]
     ];
     curricula.forEach(([lang, mods]) => mods.forEach(m => m.lessons.forEach(l => l.exercises.forEach(ex => {
       const textos = [ex.question, ex.explanation, ex.description, ex.buggyCode,
