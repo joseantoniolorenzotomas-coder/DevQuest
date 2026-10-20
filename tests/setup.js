@@ -92,7 +92,6 @@ class MockElement {
     this.offsetWidth = 100;
     this.offsetHeight = 100;
 
-    const self = this;
     this.classList = {
       _classes: new Set(),
       add(...classes) { classes.forEach(c => String(c).split(/\s+/).filter(Boolean).forEach(x => this._classes.add(x))); },

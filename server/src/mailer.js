@@ -11,7 +11,6 @@
 
 import { connect } from 'node:net';
 import { request as httpsRequest } from 'node:https';
-import { request as httpRequest } from 'node:http';
 import { config } from './config.js';
 
 const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM, SMTP_TLS, RESEND_API_KEY, CONTACT_TO } = config;

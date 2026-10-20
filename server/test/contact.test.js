@@ -1,7 +1,6 @@
 // Tests del formulario de contacto y del envío de emails
 import { test, describe, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { createServer } from 'node:http';
 import { openDatabase } from '../src/db.js';
 import { createApp } from '../src/server.js';
 import { recibirContacto, guardarMensaje, listarMensajes, ContactError } from '../src/contact.js';

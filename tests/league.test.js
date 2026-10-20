@@ -74,7 +74,6 @@ describe('League', () => {
     await window.App.renderLeague();
 
     const list = document.getElementById('leaderboard-list');
-    const bots = leerBots();
 
     // Los bots con más XP que el usuario suben al podio; el resto a la lista
     const html = list.innerHTML + document.getElementById('podium').innerHTML;

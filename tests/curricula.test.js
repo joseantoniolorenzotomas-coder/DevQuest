@@ -208,9 +208,6 @@ describe('Todos los cursos: estructura', () => {
           }
 
           if (e.type === 'fill-blank') {
-            }
-
-          if (e.type === 'fill-blank') {
             // correct es opcional: el renderizador usa blanks[], que ya es la
             // lista de respuestas exactas, y con ellas compara una a una.
             // Solo hace falta que correct apunte a la opción buena si existe.

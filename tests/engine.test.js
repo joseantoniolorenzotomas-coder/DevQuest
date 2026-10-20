@@ -382,7 +382,7 @@ describe('Engine', () => {
 
     test('soltar en la zona vacía mueve el bloque al final', () => {
       const restore = noShuffle();
-      const { container, area } = renderTwoBlocks();
+      const { area } = renderTwoBlocks();
       // Añadir un tercer bloque para que "final" sea distinto
       const extra = document.createElement('div');
       extra.dataset.origIdx = 99;

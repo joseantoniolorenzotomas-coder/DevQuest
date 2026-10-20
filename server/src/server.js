@@ -11,8 +11,6 @@ import {
 } from './users.js';
 import { ContactError, recibirContacto, listarMensajes } from './contact.js';
 
-const db = openDatabase(config.dbPath);
-
 // Rate-limit en memoria solo para auth (suficiente para v1 monoproceso;
 // con varias instancias usar Redis: ver README).
 const hits = new Map();

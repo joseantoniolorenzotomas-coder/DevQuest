@@ -26,7 +26,7 @@ describe('Motor SQL', () => {
     test('selecciona todas las columnas con *', () => {
       const r = E().ejecutar('SELECT * FROM socios');
       assert.equal(r.error, false);
-      assert.match(r.output, /^id \| nombre \| ciudad  \| socio_desde/);
+      assert.match(r.output, /^id \| nombre \| ciudad {2}\| socio_desde/);
       assert.match(r.output, /\(4 filas\)/);
     });
 

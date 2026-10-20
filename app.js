@@ -157,11 +157,11 @@ const App = {
   _escapeHtml(str) {
     if (!str) return '';
     return String(str)
-      .replace(/&/g, '&')
-      .replace(/</g, '<')
-      .replace(/>/g, '>')
-      .replace(/"/g, '"')
-      .replace(/'/g, "\'");
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   },
 
   // ─────────────────────────────────────
@@ -373,7 +373,6 @@ const App = {
   // STREAK CHECK
   // ─────────────────────────────────────
   checkStreak() {
-    const today = new Date().toDateString();
     const lastDate = this.course().user.lastStudyDate;
 
     if (!lastDate) return;
@@ -858,9 +857,9 @@ const App = {
     const total = session.exercises.length;
     const correct = total - session.mistakes;
     const accuracy = Math.round((correct / total) * 100);
-    const timeSec = Math.floor((Date.now() - session.startTime) / 1000);
 
     this._setText('complete-xp', `+${session.xpEarned}`);
+    this._setText('complete-xp-stat', `${session.xpEarned}`);
     this._setText('complete-accuracy', `${accuracy}%`);
     this._setText('complete-streak', `${this.course().user.streak}`);
     this._setText('complete-lesson-name', session.lessonTitle);

@@ -605,7 +605,7 @@ describe('App', () => {
       assert.ok(firma[1].includes('assets/img/pato-logo-128.png'));
 
       // La firma va dentro de la pantalla de perfil, después de los logros
-      const perfil = html.match(/<div id="screen-profile"[\s\S]*?\n  <\/div>/);
+      const perfil = html.match(/<div id="screen-profile"[\s\S]*?\n {2}<\/div>/);
       assert.ok(perfil, 'debe existir la pantalla de perfil');
       assert.ok(perfil[0].includes('profile-signature'));
       assert.ok(perfil[0].indexOf('profile-signature') > perfil[0].indexOf('achievements-grid'),
@@ -616,6 +616,23 @@ describe('App', () => {
       assert.ok(!html.includes('welcome-footer'), 'el pie con el pato ya no debe existir');
       assert.equal(html.split('id="btn-admin"').length - 1, 1,
         'solo puede haber un botón admin en el HTML');
+    });
+
+    test('la CSP permite ejecutar ejercicios pero no scripts inline', () => {
+      const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+      const meta = html.match(/<meta http-equiv="Content-Security-Policy" content="([\s\S]*?)">/);
+      assert.ok(meta, 'index.html debe declarar la CSP');
+
+      // Skulpt usa eval para Python y runJavaScript usa new Function.
+      // Sin 'unsafe-eval' todo ejercicio de código falla con EvalError.
+      assert.match(meta[1], /script-src[^;]*'unsafe-eval'/,
+        "script-src debe incluir 'unsafe-eval' para poder ejecutar código");
+      assert.doesNotMatch(meta[1], /script-src[^;]*'unsafe-inline'/,
+        "script-src no debe incluir 'unsafe-inline'");
+
+      // El parche de XP que estaba inline ahora vive en app.js.
+      assert.ok(!html.includes('Fix complete screen XP display'),
+        'no debe quedar el parche inline de la pantalla de completado');
     });
 
     test('el logo se marca cuando el modo administrador está activo', () => {
@@ -639,6 +656,14 @@ describe('App', () => {
       App.loadState();
       assert.equal(App.isAdmin(), false);
       App.loadState();
+    });
+
+    test('_escapeHtml neutraliza HTML y comillas', () => {
+      assert.equal(
+        App._escapeHtml('<img src=x onerror="alert(1)">'),
+        '&lt;img src=x onerror=&quot;alert(1)&quot;&gt;'
+      );
+      assert.equal(App._escapeHtml("a & b 'c'"), 'a &amp; b &#39;c&#39;');
     });
   });
 });

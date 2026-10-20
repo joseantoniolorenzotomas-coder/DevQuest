@@ -301,9 +301,6 @@ window.SQL_ENGINE = (function () {
   // Para detectar si hay que agrupar: sin ancla, porque el agregado puede
 // estar anidado dentro de una función (ROUND(AVG(precio), 2)).
 const TIENE_AGGREGADO = /\b(COUNT|SUM|AVG|MIN|MAX)\s*\(/i;
-// Para interpretarlo: aquí sí tiene que ser toda la expresión.
-const ES_AGGREGADO = /^(COUNT|SUM|AVG|MIN|MAX)\s*\(([\s\S]*)\)$/i;
-
   // ════════════════════════════════════════
   // EVALUAR EXPRESIONES
   // Devuelve el valor, o {__agregado, expr, esStar} si es un agregado

@@ -6,15 +6,18 @@
   <title>DevQuest — Aprende a programar sin límites</title>
   <meta name="description" content="Aprende Python, JavaScript, HTML, CSS, SQL, Java y C++ desde cero hasta proyectos reales. Lecciones interactivas estilo Duolingo, sin límites de tiempo. ¡Practica cuando quieras!">
   <meta name="theme-color" content="#0D0D26">
-  <!-- Content Security Policy: previene XSS limitando origenes permitidos -->
+  <!-- Content Security Policy: previene XSS limitando origenes permitidos.
+       'unsafe-eval' es imprescindible: los ejercicios ejecutan código del alumno
+       (Skulpt compila Python con eval y runJavaScript usa new Function). Sin él,
+       cualquier ejercicio de código falla aunque la solución sea correcta.
+       No se permite 'unsafe-inline': los scripts inline están prohibidos. -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
-    script-src 'self' https://cdn.jsdelivr.net;
-    style-src 'self' 'unsafe-inline';
+    script-src 'self' 'unsafe-eval' https://cdn.jsdelivr.net;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' data: https:;
-    font-src 'self' data:;
+    font-src 'self' data: https://fonts.gstatic.com;
     connect-src 'self' https:;
-    frame-ancestors 'none';
     base-uri 'self';
     form-action 'self' https://formspree.io;
   ">
@@ -464,10 +467,8 @@
 </div><!-- #app -->
 
 <!-- Python execution via Skulpt -->
-<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"
-        onerror="console.warn('Skulpt not loaded. type-code exercises will not run Python.')"></script>
-<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"
-        onerror="console.warn('Skulpt stdlib not loaded.')"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
 
 <!-- App scripts -->
 <script src="curriculum.js"></script>
@@ -510,19 +511,6 @@
 <script src="languages.js"></script>
 <script src="engine.js"></script>
 <script src="app.js"></script>
-
-<script>
-  // Fix complete screen XP display
-  const origComplete = App.showCompleteScreen?.bind(App);
-  if (App) {
-    const _origComplete = App.showCompleteScreen;
-    App.showCompleteScreen = function() {
-      _origComplete.call(this);
-      // Also update the stat value
-      document.getElementById('complete-xp-stat').textContent = this.lessonSession.xpEarned;
-    };
-  }
-</script>
 
 </body>
 </html>

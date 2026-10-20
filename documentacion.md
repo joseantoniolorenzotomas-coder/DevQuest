@@ -4,7 +4,7 @@
 
 DevQuest es una aplicación web interactiva para aprender programación desde cero hasta nivel profesional. Inspirada en Duolingo, ofrece lecciones interactivas con gamificación, ejercicios de código en tiempo real y un sistema de progreso persistente. El inicio es un hub de lenguajes con progreso, nivel y racha independientes por lenguaje. Hay **10 cursos completos** (Python, JavaScript, HTML, CSS, SQL, Java, C++, PHP, Go y TypeScript: 134 módulos, 272 lecciones y 1.640 ejercicios).
 
-**Listo para producción**: Todos los 10 cursos están completos, 716 tests en verde (frontend + servidor), seguridad revisada (CSP, escape de HTML, JWT obligatorio en producción, CORS restringido), código limpio sin morralla.
+**Listo para producción**: Todos los 10 cursos están completos, 722 tests en verde (frontend + servidor), seguridad revisada (CSP, escape de HTML, JWT obligatorio en producción, CORS restringido), código limpio sin morralla y `npm run lint` en verde.
 
 ## Tecnologías Utilizadas
 
@@ -501,11 +501,11 @@ Modifica los valores en `app.js`:
 ### Medidas implementadas
 
 **Frontend (navegador):**
-- **Content Security Policy (CSP)** en `index.html`: restringe scripts a `self` y CDN de Skulpt, estilos a `self` con `unsafe-inline` solo para estilos dinámicos, imágenes a `self` y `data:`, fuentes a `self`, conexiones a `self` y `https:`. Previene XSS inyectando scripts desde orígenes no autorizados.
+- **Content Security Policy (CSP)** en `index.html`: `script-src` permite `self`, el CDN de Skulpt y **`'unsafe-eval'`**. Ese permiso es obligatorio, no un descuido: Skulpt compila el Python del alumno con `eval` y `runJavaScript`/`runTypeScript` usan `new Function()`. Sin `'unsafe-eval'`, cualquier ejercicio de código falla con `EvalError` aunque la solución sea correcta. No se permite `'unsafe-inline'`: no hay scripts inline (el antiguo parche de XP se movió a `app.js`). Estilos de `self` + Google Fonts, imágenes `self`/`data:`/`https:`, fuentes `self`/`data:`/Google Fonts, conexiones `self`/`https:`. Previene XSS inyectando scripts desde orígenes no autorizados.
 - **Escape de HTML sistemático**: Tanto `Engine._escapeHtml()` como `App._escapeHtml()` escapan `&`, `<`, `>`, `"`, `'` antes de inyectar cualquier dato en `innerHTML`. Todos los puntos de interpolación de datos de usuario (nombres, emojis, textos de ejercicios, mensajes de error) usan estas funciones.
 - **Ejecución de código en sandbox**: Los ejercicios `type-code` usan `new Function()` con `"use strict"` y un `console` personalizado que solo captura `log`. El código del usuario no tiene acceso directo a `document`, `window`, `fetch`, `localStorage` ni APIs peligrosas.
 - **Validación de JSON del DOM**: Al leer `dataset.filled`, `dataset.blanks`, `dataset.correctOrder`, se usa `JSON.parse` dentro de `try/catch` para que datos corruptos no rompan la app.
-- **Sin `eval()` ni `document.write`**: El código no usa patrones peligrosos; solo `new Function()` en los dos motores que lo necesitan (JavaScript y TypeScript), y ambos limitan el scope.
+- **Sin `eval()` directo ni `document.write`**: El código de la app no llama a `eval()`; lo usa Skulpt internamente para ejecutar Python. Los motores de JavaScript y TypeScript usan `new Function()` con `"use strict"` y un `console` capturado. La CSP debe permitir `'unsafe-eval'` para ambos casos; la protección contra XSS se mantiene con el escape de HTML y la prohibición de scripts inline.
 
 **Backend (Node.js):**
 - **JWT_SECRET obligatorio en producción**: `config.js` lanza error si no está definido en `NODE_ENV=production`. En desarrollo usa un valor por defecto solo para facilitar el arranque.

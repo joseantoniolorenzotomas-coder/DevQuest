@@ -223,7 +223,7 @@ window.Engine = {
   },
 
   runPython(code) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       if (typeof Sk === 'undefined') {
         resolve({ output: '[Python sin soporte. Comprueba tu conexión]', error: false });
         return;
@@ -381,7 +381,6 @@ window.Engine = {
     const area = document.querySelector('.exercise-area');
     const codeBlock = area.querySelector('.code-block');
     const filled = JSON.parse(codeBlock.dataset.filled);
-    const blanks = JSON.parse(codeBlock.dataset.blanks);
 
     if (chip.classList.contains('used')) return;
 
@@ -550,10 +549,8 @@ window.Engine = {
     });
 
     // Touch support: arrastre con el dedo (requiere touch-action:none en CSS)
-    let touchStartY = 0;
     let touchMoved = false;
-    el.addEventListener('touchstart', e => {
-      touchStartY = e.touches[0].clientY;
+    el.addEventListener('touchstart', () => {
       touchMoved = false;
       el.classList.add('dragging');
     }, { passive: true });

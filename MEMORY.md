@@ -3,7 +3,8 @@
 ## Estado Actual
 - v2.23.0. Cursos completos: **Python · JavaScript · HTML · CSS · SQL · Java · C++ · PHP · Go · TypeScript**. Todos los 10 cursos tienen contenido.
 - Volumen: Python 14m/40l/230e · JS 14m/43l/258e · HTML 14m/23l/138e · CSS 14m/25l/150e · SQL 14m/27l/162e · Java 14m/24l/144e · C++ 14m/25l/150e · PHP 12m/20l/120e · Go 14m/25l/161e · TypeScript 10m/22l/127e. **Total 134m/272l/1.640e.**
-- Frontend: **683** tests en verde. Servidor: 37 tests en verde. Total **720/720** (verificado con `npm run test:all`).
+- Frontend: **685** tests en verde. Servidor: 37 tests en verde. Total **722/722** (verificado con `npm run test:all`).
+- Lint: `npm run lint` pasa con 0 errores/0 avisos (ESLint 8 + `.eslintrc.json`; navegador por defecto y Node/ESM en `server/` y `tests/`).
 - Formulario de contacto en el perfil → FormSubmit tokenizado por defecto, al buzón duckdev77@gmail.com (mismo servicio del portfolio); alternativa de backend propio en `DEVQUEST_API_URL`, con SMTP/Resend configurado.
 - **Modo administrador**: el logo del pato al final de la pantalla de Perfil (debajo de los logros), dentro de una firma con el nombre "PatoDev". Parece un logo de la app, pero abre el modal de la contraseña y activa el modo que abre todos los ejercicios para testear. No es seguridad: vive en el cliente y cualquiera puede llamar `App.setAdminMode(true)` desde la consola.
 - Liga con 12 bots de relleno (`LEAGUE_BOTS`), marcados con 🤖 y con aviso al pie.
@@ -69,6 +70,10 @@
 - **`Engine.render(ej, area)` limpia el `dataset` del área**, así que `dataset.selected` hay que ponerlo DESPUÉS de renderizar, no antes. Y `render` necesita su segundo argumento: si se le pasa solo el ejercicio, falla al escribir en `container.innerHTML`.
 - **En un intérprete propio, un valor no puede meterse dentro de otro.** El primer `foreach ($a as &$v)` guardaba un envoltorio alrededor del valor del array y escribía el nuevo valor *dentro*; al imprimir salía `[object Object]`. Hay que guardar la referencia a la posición (mapa + clave) y **reemplazar** la entrada.
 - **Un enunciado puede mentir y ningún test de estructura lo detecta.** `curricula.test.js` ejecuta las soluciones y compara con la misma función que la app: así es como se encontró que el ejercicio del `INNER JOIN` de SQL decía 3 filas cuando la tabla de préstamos tenía dos de Ana y eran 4.
+- **La CSP puede romper la ejecución de código sin tocar el código.** `script-src` sin `'unsafe-eval'` bloquea `eval`/`new Function`: Skulpt falla con `EvalError` y cualquier solución de Python parece incorrecta aunque esté perfecta. Si un ejercicio de código falla "aunque esté bien", mirar primero la CSP y la consola del navegador. `'unsafe-inline'` sigue prohibido; los parches inline se mueven a `app.js`.
+- **Probar la ejecución desde la consola del navegador engaña.** El evaluador de DevTools puede saltarse la CSP y hacer que `Engine.runPython` funcione cuando la página real no puede. Para verificar de verdad, usar un `<script src>` normal, un botón de la interfaz o la ruta real del ejercicio.
+- **El lint no es solo estilo: encontró bugs de verdad.** `App._escapeHtml` se había quedado en no-op (reemplazaba cada carácter por sí mismo, XSS), `goengine.js` llamaba a un `direccionDe` inexistente, usaba `Buffer` (no existe en el navegador) y `tsengine.js` tenía un `case` duplicado y una función redeclarada. Ejecutar `npm run lint` antes de dar algo por terminado.
+- **La configuración de ESLint tiene que distinguir entornos.** El frontend es script de navegador (`window`, `Engine`, `Sk`); `server/` y `tests/` son ESM de Node. Un solo `env` para todo produce falsos positivos o deja pasar globals reales. `.eslintrc.json` usa `overrides` para eso y `args: "none"` para firmas de callbacks que no usan todos sus parámetros.
 
 ## Próximos Pasos
 - Configurar `SMTP_HOST`/`RESEND_API_KEY` en `server/.env` para que los mensajes del formulario lleguen de verdad al buzón (ahora se guardan pero no se envían).

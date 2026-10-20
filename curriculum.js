@@ -933,7 +933,7 @@ window.CURRICULUM = {
             {
               id: 'e098', type: 'fill-blank', xp: 20,
               question: 'Busca la posición de "Python":',
-              code: 'texto = "Me gusta Python"\npos = texto.___(\"Python\")\nprint(pos)',
+              code: 'texto = "Me gusta Python"\npos = texto.___("Python")\nprint(pos)',
               blanks: ['find'],
               options: ['find', 'search', 'index', 'locate'],
               explanation: '.find() devuelve el índice donde empieza la cadena buscada.'
@@ -1075,12 +1075,8 @@ window.CURRICULUM = {
               explanation: 'if primero, luego elif. Los bloques van indentados (4 espacios).'
             },
             {
-              id: 'e113', type: 'predict-output', xp: 20,
+              id: 'e113', type: 'multiple-choice', xp: 20,
               question: '¿Cuántos elif puede tener un if?',
-              choices: ['Solo 1', 'Máximo 3', 'Tantos como quieras', 'Ninguno'],
-              output: ['Solo 1', 'Máximo 3', 'Tantos como quieras', 'Ninguno'],
-              correctOutput: 2,
-              type: 'multiple-choice',
               choices: ['Solo 1', 'Máximo 3', 'Tantos como quieras', 'Ninguno'],
               correct: 2,
               explanation: 'Puedes encadenar tantos elif como necesites.'
